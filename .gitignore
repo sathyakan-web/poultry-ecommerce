@@ -1,0 +1,40 @@
+﻿# Kilo assistant config
+.kilo/
+
+# VS Code workspace settings
+.vscode/
+
+# Debug and check scripts
+check_*.php
+api/check_login.php
+api/debug_*.php
+api/db_test.php
+api/create_admin_demo.php
+
+# Database seed/migration/fix scripts
+db/seed*.php
+db/migrate.php
+db/fix_*.php
+
+# Local test artifacts
+tmp_cookies*.txt
+inventory_response.txt
+inventory_state_local.html
+image_7116b4.jpg
+
+# Documentation and planning docs
+*.md
+docs/
+IOT_ESP32_WOKWI_MQTT_INTEGRATION.md
+inventory_redesign_plan.md
+
+# Local dev server config
+fiveserver.config.js
+
+# Shared secrets (SMS gateway + production DB). Never committed, never synced
+# to the live host - it keeps its own copy with the production DB credentials.
+config/sfs/sfs_config.php
+
+# Backup files
+*.html.bak
+*.php.bak

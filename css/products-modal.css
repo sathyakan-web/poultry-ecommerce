@@ -1,0 +1,103 @@
+/* Modal styles for product details panel */
+
+#productDetailsModal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: none;
+}
+
+#productDetailsModal.active {
+  display: flex;
+}
+
+#productDetailsModal .modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+#productDetailsModal .modal-panel {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  /* keep layout stable */
+  width: 100%;
+  max-width: 240px;
+  max-height: 50vh;
+  overflow-y: auto;
+
+  background: rgba(10, 18, 36, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  color: var(--text);
+
+  /* Reliable transition (opacity + transform) */
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.98);
+
+  transition: opacity 180ms ease, transform 220ms cubic-bezier(0.2, 0.9, 0.2, 1);
+
+  /* Themed scrollbar */
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: rgba(212, 175, 55, 0.65) rgba(0, 0, 0, 0.15);
+}
+
+#productDetailsModal.active .modal-panel {
+  pointer-events: auto;
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+#productDetailsModal .modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+#productDetailsModal .modal-body {
+  padding-top: 4px;
+}
+
+/* Product image (top-center) - only affects the modal */
+.modal-product-image {
+  display: block;
+  margin: 0 auto 12px;
+  width: 120px;
+  height: 120px;
+  border-radius: 14px;
+  object-fit: cover;
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(212, 175, 55, 0.18);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+/* Remove inner borders around modal sections (leave one border on .modal-panel) */
+#productDetailsModal .modal-panel .card {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  margin-bottom: 12px;
+  padding: 0;
+}
+
+/* prevent any extra padding mismatch from the shared .card padding */
+#productDetailsModal .modal-panel .card > * {
+  padding: 0;
+}
+
+#productDetailsModal .modal-footer {
+  margin-top: 14px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+

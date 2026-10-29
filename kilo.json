@@ -1,0 +1,14 @@
+{
+  "$schema": "https://kilo.ai",
+  "indexing": {
+    "provider": "ollama",
+    "storage": "lancedb",
+    "fileExtensions": [
+      ".php",
+      ".js",
+      ".css",
+      ".html",
+      ".json"
+    ]
+  }
+}

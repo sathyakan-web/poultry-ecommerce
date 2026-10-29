@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Safe Flock - Mobile Inventory V3</title>
+    
+    <!-- Whimsical Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700;900&family=Gochi+Hand&display=swap" rel="stylesheet">
+    
+    <style>
+        /* */
+        :root {
+            --ink: #2b2b2b;
+            --paper: #ffffff;
+            --paper-tint: #fdfbf7;
+            --bg-desk: #d1d5db;
+            
+            --yellow: #ffe66d;
+            --teal: #4ecdc4;
+            --coral: #ff6b6b;
+            --green: #06d6a0;
+            --purple: #9b5de5;
+            
+            --border-thick: 3px solid var(--ink);
+            --shadow-sm: 2px 2px 0px var(--ink);
+            --shadow-md: 4px 4px 0px var(--ink);
+            
+            --radius-sketch: 8px 24px 8px 24px / 24px 8px 24px 8px;
+            --radius-sketch-alt: 24px 8px 24px 8px / 8px 24px 8px 24px;
+            --radius-pill: 50px;
+            
+            --font-ui: 'Comic Neue', 'Comic Sans MS', sans-serif;
+            --font-display: 'Gochi Hand', 'Marker Felt', cursive;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: var(--font-ui); background-color: var(--bg-desk); color: var(--ink);
+            display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden;
+        }
+
+        /* Mobile Device Frame */
+        .mobile-frame {
+            width: 100%; max-width: 414px; height: 100vh; max-height: 896px;
+            background-color: var(--paper-tint); position: relative;
+            display: flex; flex-direction: column; overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            /* Ruled Paper Background */
+            background-image: repeating-linear-gradient(transparent, transparent 31px, rgba(0,0,0,0.06) 31px, rgba(0,0,0,0.06) 33px);
+            background-position: 0 45px;
+        }
+
+        @media (min-height: 896px) {
+            .mobile-frame { border-radius: 40px; border: 8px solid var(--ink); height: 896px; }
+        }
+
+        /* */
+        .app-header {
+            padding: 20px 15px 10px 15px; background: rgba(253, 251, 247, 0.95);
+            backdrop-filter: blur(5px); z-index: 20; border-bottom: 2px dashed rgba(0,0,0,0.1);
+            display: flex; flex-direction: column; gap: 12px;
+        }
+
+        .brand-row { display: flex; justify-content: space-between; align-items: center; }
+        .brand-title { font-family: var(--font-display); font-size: 22px; font-weight: bold; transform: rotate(-1deg); display: flex; align-items: center; gap: 8px; line-height: 1; }
+        
+        .total-badge {
+            background: var(--ink); color: var(--paper); font-weight: 900; font-size: 14px;
+            padding: 4px 12px; border-radius: 12px; transform: rotate(2deg); box-shadow: var(--shadow-sm);
+        }
+
+        /* Search Bar */
+        .search-container { position: relative; width: 100%; }
+        .search-input {
+            width: 100%; padding: 12px 15px 12px 40px; font-family: var(--font-ui); font-size: 16px; font-weight: bold;
+            color: var(--ink); background-color: var(--paper); border: 2.5px solid var(--ink);
+            border-radius: 15px; box-shadow: inset 2px 2px 5px rgba(0,0,0,0.05); outline: none; transition: 0.2s;
+        }
+        .search-input:focus { border-color: var(--teal); box-shadow: 3px 3px 0px var(--teal); transform: translateY(-2px); }
+        .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; stroke: var(--ink); stroke-width: 3; fill: none; pointer-events: none; }
+
+        /* Horizontal Scroll Chips */
+        .chip-scroll { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
+        .chip-scroll::-webkit-scrollbar { display: none; }
+        .chip {
+            white-space: nowrap; padding: 6px 16px; font-weight: bold; font-size: 15px;
+            border: 2px solid var(--ink); border-radius: 20px; background: var(--paper);
+            color: var(--ink); cursor: pointer; transition: all 0.2s; box-shadow: 2px 2px 0px rgba(0,0,0,0.1);
+        }
+        .chip.active { background: var(--teal); box-shadow: var(--shadow-sm); transform: translateY(-2px) rotate(-1deg); }
+
+        /* */
+        .inventory-list {
+            flex-grow: 1; overflow-y: auto; padding: 15px; padding-bottom: 175px; /* Space for FAB + Dock */
+            display: flex; flex-direction: column; gap: 12px; scrollbar-width: none;
+        }
+        .inventory-list::-webkit-scrollbar { display: none; }
+
+        .inv-card {
+            background: var(--paper); border: 2.5px solid var(--ink); border-radius: 15px;
+            box-shadow: 3px 3px 0px rgba(0,0,0,0.1); transition: all 0.2s;
+            padding: 12px; display: flex; align-items: center; gap: 12px; cursor: pointer;
+        }
+        .inv-card:active { transform: translateY(2px); box-shadow: 1px 1px 0px rgba(0,0,0,0.1); }
+        .inv-card.low-stock { border-color: var(--coral); background: #fff5f5; }
+
+        .thumb-box {
+            width: 55px; height: 55px; border: 2px solid var(--ink); border-radius: 12px;
+            background: #eee; flex-shrink: 0; transform: rotate(-2deg); overflow: hidden;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .thumb-box img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .info-col { flex-grow: 1; overflow: hidden; }
+        .item-name { font-family: var(--font-display); font-size: 19px; line-height: 1.1; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .item-meta { font-size: 12px; font-weight: bold; color: #666; display: flex; gap: 5px; align-items: center;}
+        
+        .qty-circle {
+            width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--ink); flex-shrink: 0;
+            display: flex; justify-content: center; align-items: center; font-family: var(--font-display);
+            font-size: 20px; font-weight: bold; background: var(--green); color: var(--ink); box-shadow: 2px 2px 0px rgba(0,0,0,0.15);
+        }
+        .low-stock .qty-circle { background: var(--coral); color: white; animation: pulse-danger 2s infinite; }
+
+        @keyframes pulse-danger { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1) rotate(5deg); } }
+
+        /* Product removal animations */
+        @keyframes shake-danger {
+          0%, 100% { transform: translateX(0); }
+          20% { transform: translateX(-7px) rotate(-4deg); }
+          40% { transform: translateX(7px) rotate(4deg); }
+          60% { transform: translateX(-4px) rotate(-2deg); }
+          80% { transform: translateX(4px) rotate(2deg); }
+        }
+        @keyframes popOut {
+          0% { transform: scale(1); opacity: 1; box-shadow: var(--shadow-md); }
+          30% { transform: scale(1.15) rotate(8deg); opacity: 0.75; box-shadow: 0 0 20px var(--coral); }
+          100% { transform: scale(0) rotate(-14deg); opacity: 0; box-shadow: none; }
+        }
+        .inv-card.deleting { animation: popOut 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+        .remove-card.shake { animation: shake-danger 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both; }
+
+        /* Remove sheet delete button */
+        .rm-delete-btn {
+            width: 100%; padding: 14px; background: var(--coral); color: var(--paper);
+            font-family: var(--font-ui); font-size: 16px; font-weight: 900;
+            border: 2.5px solid var(--ink); border-radius: 15px; box-shadow: var(--shadow-md);
+            cursor: pointer; transition: 0.15s; margin-top: 10px;
+        }
+        .rm-delete-btn:active { transform: translate(4px, 4px); box-shadow: 0 0 0 transparent; background: #e03a3a; }
+
+        /* Remove confirm modal */
+        .rm-confirm-modal {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65);
+            z-index: 9999; align-items: center; justify-content: center;
+        }
+        .rm-confirm-card {
+            background: var(--paper); border: var(--border-thick); border-radius: 20px;
+            padding: 24px; max-width: 340px; width: 92%; text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+        }
+        .rm-confirm-card h3 { margin: 0 0 12px; font-family: var(--font-display); font-size: 22px; }
+        .rm-confirm-img {
+            width: 100%; height: 120px; object-fit: cover; border-radius: 12px;
+            border: var(--border-thick); margin-bottom: 12px;
+        }
+        .rm-confirm-name { font-weight: 900; margin: 8px 0 4px; font-size: 18px; }
+        .rm-confirm-code { font-size: 13px; color: #666; margin: 0 0 16px; }
+        .rm-confirm-actions { display: flex; gap: 12px; justify-content: center; }
+        .rm-confirm-actions button { flex: 1; padding: 12px; font-family: var(--font-ui); font-weight: 900; border-radius: 12px; cursor: pointer; }
+        .rm-confirm-actions .rm-cancel-btn {
+            background: var(--paper-tint); border: 2.5px solid var(--ink); color: var(--ink);
+            box-shadow: var(--shadow-sm);
+        }
+        .rm-confirm-actions .rm-delete-btn {
+            background: var(--coral); border: 2.5px solid var(--ink); color: var(--paper);
+            box-shadow: var(--shadow-md);
+        }
+        .rm-confirm-actions button:active { transform: translate(3px, 3px); box-shadow: none; }
+
+        /* Highlight Search Match */
+        mark { background: var(--yellow); padding: 0 2px; border-radius: 3px; font-weight: bold; color: var(--ink); }
+
+        /* */
+        .fab-container { position: absolute; bottom: 165px; right: 15px; z-index: 40; }
+        .fab-circle {
+            width: 60px; height: 60px; background: var(--yellow); border: var(--border-thick); border-radius: 50%;
+            display: flex; justify-content: center; align-items: center; font-size: 32px; font-weight: bold;
+            box-shadow: var(--shadow-md); cursor: pointer; transition: 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); color: var(--ink);
+        }
+        .fab-circle:active { transform: translate(4px, 4px) rotate(15deg); box-shadow: 0 0 0 transparent; }
+
+        /* Modal Overlay */
+        .modal-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 100;
+            display: flex; flex-direction: column; justify-content: flex-end; opacity: 0; pointer-events: none; transition: opacity 0.3s;
+        }
+        .modal-overlay.open { opacity: 1; pointer-events: auto; }
+        
+        /* Bottom Sheets */
+        .bottom-sheet {
+            background: var(--paper); border-top: 4px solid var(--ink); border-radius: 30px 30px 0 0;
+            padding: 25px 20px 30px 20px; display: flex; flex-direction: column; gap: 15px; transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative; box-shadow: 0 -5px 20px rgba(0,0,0,0.2);
+        }
+        .modal-overlay.open .bottom-sheet { transform: translateY(0); }
+        .drag-handle { width: 50px; height: 6px; background: #ccc; border-radius: 3px; margin: -10px auto 10px auto; }
+        
+        /* Specific Sheet: Add Product */
+        #addProductSheet { height: 85%; overflow-y: auto; scrollbar-width: none; }
+        
+        /* Specific Sheet: Adjust Stock */
+        #adjustStockSheet { height: auto; }
+
+        .sheet-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px; }
+        .sheet-title { font-family: var(--font-display); font-size: 26px; line-height: 1.1; margin-bottom: 4px;}
+        .sheet-subtitle { font-size: 13px; font-weight: bold; color: #666; }
+        
+        .close-btn { width: 35px; height: 35px; border: 2px solid var(--ink); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 20px; background: #eee; cursor: pointer; box-shadow: 2px 2px 0px var(--ink); flex-shrink: 0;}
+
+        /* */
+        /* Segmented Controls for Math Operation */
+        .math-segments { display: flex; background: rgba(0,0,0,0.05); border-radius: 12px; padding: 4px; border: 2px solid var(--ink); margin-top: 10px;}
+        .segment-btn { flex: 1; text-align: center; padding: 10px; font-weight: 900; font-size: 15px; color: #666; cursor: pointer; border-radius: 8px; transition: 0.2s;}
+        .segment-btn.active.add { background: var(--green); color: var(--ink); box-shadow: var(--shadow-sm); transform: scale(1.05);}
+        .segment-btn.active.sub { background: var(--coral); color: white; box-shadow: var(--shadow-sm); transform: scale(1.05);}
+        .segment-btn.active.set { background: var(--yellow); color: var(--ink); box-shadow: var(--shadow-sm); transform: scale(1.05);}
+
+        /* Massive Input Field */
+        .giant-input-wrapper { display: flex; align-items: center; justify-content: center; gap: 20px; margin: 15px 0; }
+        .giant-input-wrapper button { width: 50px; height: 50px; border-radius: 50%; border: 3px solid var(--ink); background: var(--paper); font-size: 28px; font-weight: bold; box-shadow: 3px 3px 0px var(--ink); cursor: pointer; display: flex; justify-content: center; align-items: center;}
+        .giant-input-wrapper button:active { transform: translate(3px, 3px); box-shadow: none; }
+        .giant-input {
+            width: 120px; text-align: center; font-family: var(--font-display); font-size: 54px; border: none; background: transparent; color: var(--ink); outline: none; border-bottom: 4px solid var(--ink); border-radius: 0; padding: 0;
+        }
+
+        .update-btn {
+            width: 100%; padding: 15px; background: var(--ink); color: var(--paper); font-family: var(--font-ui); font-size: 18px; font-weight: 900;
+            border: none; border-radius: 15px; box-shadow: var(--shadow-md); cursor: pointer; transition: 0.15s; display: flex; justify-content: center; align-items: center; gap: 8px;
+        }
+        .update-btn:active { transform: translate(4px, 4px); box-shadow: 0 0 0 transparent; }
+
+        /* Standard Forms */
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        .form-label { font-size: 14px; font-weight: 900; color: var(--ink); }
+        .doodle-input {
+            width: 100%; padding: 14px; font-family: var(--font-ui); font-size: 16px; font-weight: bold;
+            color: var(--ink); background-color: var(--paper-tint); border: 2.5px solid var(--ink);
+            border-radius: 12px; box-shadow: inset 2px 2px 5px rgba(0,0,0,0.05); outline: none; transition: 0.2s;
+        }
+        .doodle-input:focus { border-color: var(--teal); box-shadow: 3px 3px 0px var(--teal); background: var(--paper); transform: translateY(-2px);}
+
+        /* Image Upload UI */
+        .upload-box {
+            border: 2.5px dashed var(--ink); border-radius: 15px; padding: 20px; text-align: center;
+            background: rgba(0,0,0,0.02); cursor: pointer; transition: 0.2s; position: relative; overflow: hidden;
+        }
+        .upload-box:active { background: var(--yellow); border-style: solid; }
+        #previewContainer { position: absolute; inset: 0; background: var(--paper); display: none; }
+        #previewImg { width: 100%; height: 100%; object-fit: cover; }
+        .remove-img { position: absolute; top: 10px; right: 10px; background: var(--coral); color: white; border: 2px solid var(--ink); border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-weight: bold; box-shadow: 2px 2px 0px var(--ink); cursor: pointer;}
+
+        /* */
+        .toast-msg {
+            position: absolute; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px);
+            background-color: var(--ink); color: var(--paper); padding: 12px 20px;
+            border-radius: 15px; font-family: var(--font-ui); font-size: 16px; font-weight: bold; white-space: nowrap;
+            z-index: 1000; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 4px 4px 0px var(--teal); display: flex; align-items: center; gap: 8px; border: 2px solid white;
+        }
+        .toast-msg.show { transform: translateX(-50%) translateY(0) rotate(1deg); }
+
+        .web-dock-container { position: absolute; bottom: 70px; left: 15px; right: 15px; z-index: 30; }
+        .flock-dock {
+            background-color: var(--paper); border: var(--border-thick); border-radius: 40px 50px 45px 55px / 55px 45px 50px 40px;
+            box-shadow: 5px 5px 0px var(--ink); display: flex; align-items: center; padding: 10px 15px;
+            height: 85px; width: 90%; max-width: 650px; position: relative;
+        }
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--ink); flex: 1; height: 100%; position: relative; z-index: 2; cursor: pointer; transition: transform 0.2s; text-decoration: none;
+        }
+        .icon-container { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; margin-bottom: 4px; }
+        .nav-item svg { width: 28px; height: 28px; fill: none; stroke: var(--ink); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+        .nav-label { font-size: 12px; font-weight: 900; letter-spacing: 0.5px; }
+        .active-indicator {
+            position: absolute; height: 70px; background-color: var(--yellow); border: 2px dashed var(--ink);
+            border-radius: 30px 40px 30px 40px / 40px 30px 40px 30px; box-shadow: 2px 2px 0px var(--ink); top: 5px; left: 0; z-index: 1;
+            transition: left 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            animation: squish-dock 4s infinite alternate;
+        }
+        .nav-item.active { color: var(--ink); }
+        .nav-item.active svg { transform: translateY(-5px) scale(1.15) rotate(-5deg); filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.2)); }
+        @keyframes squish-dock {
+            0% { border-radius: 30px 40px 30px 40px / 40px 30px 40px 30px; }
+            100% { border-radius: 40px 30px 40px 30px / 30px 40px 30px 40px; }
+        }
+        @media (max-width: 768px) {
+            .flock-dock { width: 95%; height: 75px; padding: 5px; }
+            .nav-item svg { width: 24px; height: 24px; }
+            .nav-label { font-size: 10px; }
+            .active-indicator { height: 60px; top: 5px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mobile-frame">
+        
+        <!-- Toast Notification -->
+        <div id="toast" class="toast-msg"><span id="toastIcon">✨</span> <span id="toastText">Action triggered!</span></div>
+
+        <!-- --- STREAMING_CHUNK: Header, Search & Filters --- -->
+        <header class="app-header">
+            <div class="brand-row">
+                <div class="brand-title">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                    Safe Flock Solutions
+                </div>
+                <div class="total-badge" id="totalItemsBadge">0 Items</div>
+            </div>
+            
+            <!-- Real-time Search Bar -->
+            <div class="search-container">
+                <svg class="search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" id="searchInput" class="search-input" placeholder="Search stock (e.g. Vax, Powder)..." oninput="handleSearch(event)">
+            </div>
+
+            <!-- Scrollable Category Chips -->
+            <div class="chip-scroll" id="filterContainer">
+                <div class="chip active" onclick="setFilter('all', this)">All Stock</div>
+                <div class="chip" onclick="setFilter('vaccines', this)">Vaccines 💉</div>
+                <div class="chip" onclick="setFilter('layer_meds', this)">Layer Meds 💊</div>
+                <div class="chip" onclick="setFilter('feed_meds', this)">Feed Meds 🪣</div>
+                <div class="chip" onclick="setFilter('water', this)">Water 💧</div>
+            </div>
+        </header>
+
+        <!-- --- STREAMING_CHUNK: Flat Inventory List --- -->
+        <main class="inventory-list" id="inventoryList">
+            <!-- Populated by JS -->
+        </main>
+
+        <!-- --- STREAMING_CHUNK: Floating Action Button --- -->
+        <div class="fab-container">
+            <div class="fab-circle" onclick="openAddModal()" style="background:var(--success,#06d6a0);">+</div>
+            <div class="fab-circle" onclick="openRemoveSheet()" style="background:#ef4444;margin-bottom:8px;font-size:20px;">−</div>
+        </div>
+
+        <!-- --- STREAMING_CHUNK: Slide-Up Modals (Bottom Sheets) --- -->
+        
+        <!-- Modal Overlay Background -->
+        <div class="modal-overlay" id="mainModalOverlay" onclick="closeAllModals(event)">
+            
+            <!-- Sheet 1: Adjust Stock -->
+            <div class="bottom-sheet" id="adjustStockSheet" onclick="event.stopPropagation()">
+                <div class="drag-handle"></div>
+                <div class="sheet-header">
+                    <div>
+                        <h2 class="sheet-title" id="adjName">Product Name</h2>
+                        <div class="sheet-subtitle" id="adjMeta">Size • Current: 0</div>
+                    </div>
+                    <div class="close-btn" onclick="closeAllModals(event)">×</div>
+                </div>
+
+                <div class="math-segments" id="adjustSegments">
+                    <div class="segment-btn active add" onclick="setOp('add')">Add</div>
+                    <div class="segment-btn sub" onclick="setOp('sub')">Deduct</div>
+                    <div class="segment-btn set" onclick="setOp('set')">Set</div>
+                </div>
+                
+                <div class="giant-input-wrapper">
+                    <button onclick="changeQtyVal(-1)">-</button>
+                    <input type="number" class="giant-input" id="adjustInput" value="10" data-op="add">
+                    <button onclick="changeQtyVal(1)">+</button>
+                </div>
+                
+                <button class="update-btn" id="confirmAdjustBtn" onclick="submitAdjustment()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    Update Inventory
+                </button>
+            </div>
+
+            <!-- Sheet 2: Add New Product -->
+            <div class="bottom-sheet" id="addProductSheet" onclick="event.stopPropagation()">
+                <div class="drag-handle"></div>
+                <div class="sheet-header">
+                    <div>
+                        <h2 class="sheet-title">Create Item</h2>
+                        <div class="sheet-subtitle">Add a new product to inventory</div>
+                    </div>
+                    <div class="close-btn" onclick="closeAllModals(event)">×</div>
+                </div>
+
+                <!-- Image Upload -->
+                <div class="form-group">
+                    <input type="file" id="newImage" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+                    <div class="upload-box" onclick="document.getElementById('newImage').click()">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="margin: 0 auto 5px auto;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                        <div style="font-weight: 900;">Tap to snap a photo or upload</div>
+                        
+                        <div id="previewContainer">
+                            <img id="previewImg" src="">
+                            <div class="remove-img" onclick="removeImage(event)">×</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Product Name</label>
+                    <input type="text" id="newName" class="doodle-input" placeholder="e.g., Avian Flu Vax">
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">Category</label>
+                        <select id="newCat" class="doodle-input" style="appearance: none;">
+                            <option value="vaccines">Vaccines</option>
+                            <option value="layer_meds">Layer Meds</option>
+                            <option value="feed_meds">Feed Meds</option>
+                            <option value="water">Water</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">Size / Pack</label>
+                        <input type="text" id="newSize" class="doodle-input" placeholder="e.g., 500ml">
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 10px; align-items: flex-end;">
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">Price (₹)</label>
+                        <input type="number" id="newPrice" class="doodle-input" placeholder="0.00">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">Start Qty</label>
+                        <input type="number" id="newQty" class="doodle-input" value="50" style="text-align: center; font-size: 22px;">
+                    </div>
+                </div>
+
+                <button class="update-btn" style="background: var(--green); color: var(--ink); margin-top: 10px; font-size: 20px; padding: 15px;" onclick="submitNewProduct()">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    Register to Inventory
+                </button>
+            </div>
+
+            <!-- Sheet 3: Remove Product -->
+            <div class="bottom-sheet" id="removeProductSheet" onclick="event.stopPropagation()">
+                <div class="drag-handle"></div>
+                <div class="sheet-header">
+                    <div>
+                        <h2 class="sheet-title">Remove Product</h2>
+                        <div class="sheet-subtitle">Delete a product from inventory</div>
+                    </div>
+                    <div class="close-btn" onclick="closeAllModals(event)">×</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Category</label>
+                    <select id="rmCat" class="doodle-input" style="appearance:none;" onchange="filterRemoveProducts()">
+                        <option value="">Select a category</option>
+                        <option value="vaccines">Vaccines</option>
+                        <option value="layer_meds">Layer Meds</option>
+                        <option value="feed_meds">Feed Meds</option>
+                        <option value="water">Water</option>
+                        <option value="meds">Meds</option>
+                        <option value="supplies">Supplies</option>
+                    </select>
+                </div>
+
+                <div id="removeProductGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-height:300px;overflow:auto;padding:6px;"></div>
+
+                <button class="rm-delete-btn" id="rmBtn" onclick="showRemoveConfirm()">Delete Product</button>
+            </div>
+
+            <!-- Remove Confirm Modal -->
+            <div id="removeConfirmModal" class="rm-confirm-modal">
+                <div class="rm-confirm-card">
+                    <h3>Delete Product?</h3>
+                    <img id="rmConfirmImg" class="rm-confirm-img" src="" alt="" onerror="this.style.display='none'">
+                    <p id="rmConfirmName" class="rm-confirm-name"></p>
+                    <p id="rmConfirmCode" class="rm-confirm-code"></p>
+                    <div class="rm-confirm-actions">
+                        <button class="rm-cancel-btn" onclick="closeRemoveConfirm()">Cancel</button>
+                        <button class="rm-delete-btn" onclick="confirmRemove()">Delete</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- --- STREAMING_CHUNK: Dock Navigation --- -->
+        <div class="web-dock-container">
+            <nav class="flock-dock" id="bottomNav">
+                <div class="active-indicator" id="activeIndicator"></div>
+                <a href="index.php" class="nav-item" data-page="home"><div class="icon-container"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></div><span class="nav-label">Home</span></a>
+                <a href="qr.php" class="nav-item" data-page="verify"><div class="icon-container"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><rect x="7" y="7" width="3" height="3"></rect><rect x="14" y="7" width="3" height="3"></rect><rect x="7" y="14" width="3" height="3"></rect><rect x="14" y="14" width="3" height="3"></rect></svg></div><span class="nav-label">Verify QR</span></a>
+                <a href="orders.php" class="nav-item" data-page="orders"><div class="icon-container"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg></div><span class="nav-label">Orders</span></a>
+                <a href="#" class="nav-item" data-page="logistics"><div class="icon-container"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg></div><span class="nav-label">Logistics</span></a>
+                <a href="inventory.php" class="nav-item active" data-page="inventory"><div class="icon-container"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg></div><span class="nav-label">Inventory</span></a>
+                <a href="settings.php" class="nav-item" data-page="settings"><div class="icon-container"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l-.06.06a1.65 1.65 0 0 0-.33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2 2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></div><span class="nav-label">Settings</span></a>
+            </nav>
+        </div>
+    </div>
+
+    <script src="js/desktop-dock.js"></script>
+    <!-- --- STREAMING_CHUNK: Application Logic & Background Services --- -->
+    <script>
+        // 1. Data Store - Loaded from API
+        let inventoryData = [];
+
+        const LOW_STOCK_THRESHOLD = 20;
+        let currentFilter = 'all';
+        let searchQuery = '';
+        let uploadedImageBase64 = null;
+        let activeAdjustId = null;
+
+        function getCsrfToken() {
+            const meta = document.querySelector('meta[name="csrf-token"]');
+            return meta ? meta.getAttribute('content') : '';
+        }
+
+        async function loadInventory() {
+            try {
+                const res = await fetch('api/inventory.php', { credentials: 'same-origin' });
+                const data = await res.json();
+                if (!data.ok) throw new Error(data.error || data.message || 'Failed to load inventory');
+                inventoryData = (data.inventory || []).map(row => ({
+                    id: String(row.product_id ?? row.id ?? ''),
+                    name: row.product ?? row.name ?? '',
+                    cat: row.category ?? row.cat ?? '',
+                    size: row.size ?? '',
+                    price: String(row.price ?? '0.00'),
+                    qty: Number(row.qty ?? 0),
+                    img: row.logo_path ?? row.img ?? ''
+                }));
+                renderInventory();
+            } catch (e) {
+                showToast('Failed to load inventory: ' + (e.message || 'Network error'), '⚠️');
+                console.error(e);
+            }
+        }
+
+        // --- BACKGROUND SMS SERVICE (Textbee) ---
+        const TEXTBEE_API_KEY = ""; // Enter your key here to make it live
+        const PROVIDER_PHONE = "+1234567890"; // Target number
+
+        async function triggerBackgroundSMS(productName, remainingQty) {
+            const message = `🚨 SAFE FLOCK: Stock for ${productName} is low! Only ${remainingQty} units left.`;
+            console.log("[Background Task] Attempting to send SMS:", message);
+
+            if (!TEXTBEE_API_KEY) {
+                setTimeout(() => showToast(`Low Stock! SMS Alert sent to Provider! 📱`, "🚨"), 800);
+                return;
+            }
+
+            try {
+                const response = await fetch('https://api.textbee.dev/api/v1/gateway/send-sms', {
+                    method: 'POST',
+                    headers: { 'x-api-key': TEXTBEE_API_KEY, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ recipients: [PROVIDER_PHONE], message: message })
+                });
+                if (response.ok) {
+                    setTimeout(() => showToast(`SMS Alert sent to Provider! 📱`, "🚨"), 800);
+                }
+            } catch (err) {
+                console.error("Network Error sending SMS", err);
+            }
+        }
+
+        // --- UI Rendering ---
+        function handleSearch(e) {
+            searchQuery = e.target.value.toLowerCase().trim();
+            renderInventory();
+        }
+
+        function setFilter(cat, element) {
+            currentFilter = cat;
+            document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+            element.classList.add('active');
+            renderInventory();
+        }
+
+        function renderInventory() {
+            const list = document.getElementById('inventoryList');
+            list.innerHTML = '';
+            
+            // Filter by BOTH Category and Search Query
+            const filteredData = inventoryData.filter(i => {
+                const matchesCat = currentFilter === 'all' || i.cat === currentFilter;
+                const matchesSearch = !searchQuery || i.name.toLowerCase().includes(searchQuery) || i.cat.toLowerCase().includes(searchQuery);
+                return matchesCat && matchesSearch;
+            });
+
+            document.getElementById('totalItemsBadge').innerText = `${filteredData.length} Items`;
+
+            if(filteredData.length === 0) {
+                list.innerHTML = `<div style="text-align:center; padding:40px; color:#888; font-weight:bold;">No products found! 🧐</div>`;
+                return;
+            }
+
+            filteredData.forEach((item) => {
+                const isLow = item.qty <= LOW_STOCK_THRESHOLD;
+                const cardClass = isLow ? 'inv-card low-stock' : 'inv-card';
+                const tagColor = item.cat === 'vaccines' ? 'var(--teal)' : (item.cat === 'layer_meds' ? 'var(--coral)' : (item.cat === 'feed_meds' ? 'var(--yellow)' : 'var(--green)'));
+                const displayCat = item.cat === 'vaccines' ? 'Vaccines' : (item.cat === 'layer_meds' ? 'Layer Meds' : (item.cat === 'feed_meds' ? 'Feed Meds' : (item.cat === 'water' ? 'Water' : item.cat)));
+                
+                // Highlight search term
+                let displayName = item.name;
+                if(searchQuery) {
+                    const regex = new RegExp(`(${searchQuery})`, "gi");
+                    displayName = displayName.replace(regex, `<mark>$1</mark>`);
+                }
+
+                const imgSrc = item.img ? item.img : `https://placehold.co/100x100/ffe66d/2b2b2b?text=New`;
+
+                const html = `
+                    <div class="${cardClass}" data-pid="${item.id}" onclick="openAdjustModal('${item.id}')">
+                        <div class="thumb-box"><img src="${imgSrc}" alt="${item.name}" onerror="this.src='https://placehold.co/100x100/ffe66d/2b2b2b?text=New'"></div>
+                        <div class="info-col">
+                            <div class="item-name">${displayName}</div>
+                            <div class="item-meta">
+                                <span style="background: ${tagColor}; color: #000; padding: 2px 8px; border-radius: 8px; border: 1.5px solid var(--ink);">${displayCat}</span>
+                                ${item.size ? item.size + ' • ' : ''}₹${item.price}
+                            </div>
+                        </div>
+                        <div class="qty-circle">${item.qty}</div>
+                    </div>
+                `;
+                list.insertAdjacentHTML('beforeend', html);
+            });
+        }
+
+        // --- Slide-Up Modals & Adjustments ---
+        function closeAllModals(e) {
+            try {
+                if (e && e.target) {
+                    const overlay = document.getElementById('mainModalOverlay');
+                    const clickedOnOverlay = overlay && e.target === overlay;
+                    const clickedCloseBtn = e.target.closest && e.target.closest('.close-btn');
+                    if (!clickedOnOverlay && !clickedCloseBtn) return;
+                }
+            } catch (err) {
+                console.error('[closeAllModals] guard error:', err);
+            }
+            const overlay = document.getElementById('mainModalOverlay');
+            if (overlay) overlay.classList.remove('open');
+            const adjustSheet = document.getElementById('adjustStockSheet');
+            if (adjustSheet) adjustSheet.style.display = 'none';
+            const addSheet = document.getElementById('addProductSheet');
+            if (addSheet) addSheet.style.display = 'none';
+            const removeConfirm = document.getElementById('removeConfirmModal');
+            if (removeConfirm) removeConfirm.style.display = 'none';
+            const removeSheet = document.getElementById('removeProductSheet');
+            if (removeSheet) removeSheet.style.display = 'none';
+            activeAdjustId = null;
+        }
+
+        function openAdjustModal(id) {
+            const item = inventoryData.find(i => String(i.id) === String(id));
+            if(!item) return;
+            activeAdjustId = id;
+
+            // Populate Modal Data
+            document.getElementById('adjName').innerText = item.name;
+            document.getElementById('adjMeta').innerText = `${item.size || 'No size'} • Current Qty: ${item.qty}`;
+            
+            // Reset to Add 10 defaults
+            setOp('add');
+
+            // Show specific sheet
+            document.getElementById('addProductSheet').style.display = 'none';
+            document.getElementById('adjustStockSheet').style.display = 'flex';
+            document.getElementById('mainModalOverlay').classList.add('open');
+        }
+
+        function openAddModal() {
+            // Reset form
+            document.getElementById('newName').value = '';
+            document.getElementById('newSize').value = '';
+            document.getElementById('newPrice').value = '';
+            document.getElementById('newQty').value = '50';
+            removeImage();
+
+            // Show specific sheet
+            document.getElementById('adjustStockSheet').style.display = 'none';
+            document.getElementById('addProductSheet').style.display = 'flex';
+            document.getElementById('mainModalOverlay').classList.add('open');
+        }
+
+        function setOp(op) {
+            const container = document.getElementById('adjustSegments');
+            const input = document.getElementById('adjustInput');
+            const item = inventoryData.find(i => String(i.id) === String(activeAdjustId));
+            
+            container.querySelectorAll('.segment-btn').forEach(b => {
+                b.className = `segment-btn ${b.classList.contains('add') ? 'add' : (b.classList.contains('sub') ? 'sub' : 'set')}`;
+            });
+            container.querySelector(`.${op}`).classList.add('active');
+            
+            input.dataset.op = op;
+            // Default logic: add/sub default to 10, set defaults to current qty
+            input.value = op === 'set' && item ? item.qty : 10;
+        }
+
+        function changeQtyVal(amount) {
+            const input = document.getElementById('adjustInput');
+            let val = parseInt(input.value) || 0;
+            input.value = Math.max(0, val + amount);
+        }
+
+        async function submitAdjustment() {
+            if(!activeAdjustId) return;
+            const item = inventoryData.find(i => String(i.id) === String(activeAdjustId));
+            if(!item) return;
+            const input = document.getElementById('adjustInput');
+            const op = input.dataset.op;
+            const val = parseInt(input.value) || 0;
+            const oldQty = item.qty;
+
+            const form = new FormData();
+            form.set('product_id', String(item.id));
+            form.set('qty', String(val));
+            form.set('inv_action', op === 'sub' ? 'deduct' : op);
+            form.set('csrf_token', getCsrfToken());
+
+            try {
+                const res = await fetch('api/inventory_upsert.php', {
+                    method: 'POST',
+                    body: form,
+                    credentials: 'same-origin'
+                });
+                const data = await res.json();
+                if (!data.ok) throw new Error(data.error || 'Update failed');
+
+                const updated = data.inventory || {};
+                const serverQty = Number(updated.qty ?? oldQty);
+                item.qty = serverQty;
+                item.price = updated.price ? String(updated.price) : item.price;
+                item.size = updated.size ? String(updated.size) : item.size;
+
+                showToast(`Updated! ${oldQty} ➔ ${item.qty}`, "📝");
+                closeAllModals();
+                
+                if (oldQty > LOW_STOCK_THRESHOLD && item.qty <= LOW_STOCK_THRESHOLD) {
+                    triggerBackgroundSMS(item.name, item.qty);
+                }
+
+                renderInventory();
+            } catch (e) {
+                showToast(e.message || 'Update failed', '⚠️');
+                console.error('[submitAdjustment] failed:', e);
+            }
+        }
+
+        // --- Add Product Logic ---
+        function handleImageUpload(e) {
+            const file = e.target.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    uploadedImageBase64 = ev.target.result;
+                    document.getElementById('previewImg').src = uploadedImageBase64;
+                    document.getElementById('previewContainer').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function removeImage(e) {
+            if (e) e.stopPropagation();
+            uploadedImageBase64 = null;
+            document.getElementById('newImage').value = '';
+            document.getElementById('previewContainer').style.display = 'none';
+            document.getElementById('previewImg').src = '';
+        }
+
+        async function submitNewProduct() {
+            const name = document.getElementById('newName').value.trim();
+            const cat = document.getElementById('newCat').value;
+            const size = document.getElementById('newSize').value.trim();
+            const price = parseFloat(document.getElementById('newPrice').value) || 0;
+            const qty = parseInt(document.getElementById('newQty').value) || 0;
+
+            if(!name || !size || !price) {
+                showToast("Please fill all details!", "⚠️");
+                return;
+            }
+
+            const form = new FormData();
+            form.set('new_product_name', name);
+            form.set('new_category', cat);
+            form.set('new_product_description', 'Created via mobile inventory');
+            form.set('new_product_price', String(price));
+            form.set('new_product_size', size);
+            form.set('qty', String(qty));
+            form.set('inv_action', 'set');
+            form.set('csrf_token', getCsrfToken());
+
+            if (uploadedImageBase64 && document.getElementById('newImage').files.length > 0) {
+                form.set('product_image', document.getElementById('newImage').files[0]);
+            }
+
+            try {
+                const res = await fetch('api/inventory_upsert.php', {
+                    method: 'POST',
+                    body: form,
+                    credentials: 'same-origin'
+                });
+                const data = await res.json();
+                if (!data.ok) throw new Error(data.error || 'Failed to register product');
+
+                const inv = data.inventory || {};
+                const newItem = {
+                    id: String(inv.product_id || Date.now()),
+                    cat: inv.category || cat,
+                    name: inv.product || name,
+                    size: inv.size || size,
+                    price: String(inv.price || price),
+                    qty: Number(inv.qty ?? qty),
+                    img: inv.logo_path ? inv.logo_path : (uploadedImageBase64 || `https://placehold.co/100x100/ffe66d/2b2b2b?text=New`)
+                };
+
+                inventoryData.unshift(newItem);
+                closeAllModals();
+                showToast("Product Registered!", "🎉");
+                
+                document.getElementById('newName').value = '';
+                document.getElementById('newSize').value = '';
+                document.getElementById('newPrice').value = '';
+                document.getElementById('newQty').value = '50';
+                document.getElementById('searchInput').value = '';
+                searchQuery = '';
+                setFilter('all', document.querySelector('.chip'));
+            } catch (e) {
+                showToast(e.message || 'Failed to register product', '⚠️');
+                console.error('[submitNewProduct] failed:', e);
+            }
+        }
+
+        // --- Utilities ---
+        function showToast(msg, icon = '✨') {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastIcon').innerText = icon;
+            document.getElementById('toastText').innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        let selectedRemoveId = null;
+        let selectedRemoveProduct = null;
+        let mobileProducts = [];
+
+        function openRemoveSheet() {
+            document.getElementById('addProductSheet').style.display = 'none';
+            document.getElementById('adjustStockSheet').style.display = 'none';
+            document.getElementById('removeProductSheet').style.display = 'flex';
+            document.getElementById('mainModalOverlay').classList.add('open');
+            filterRemoveProducts();
+        }
+
+        function filterRemoveProducts() {
+            const cat = document.getElementById('rmCat').value;
+            const grid = document.getElementById('removeProductGrid');
+            grid.innerHTML = '';
+            selectedRemoveId = null;
+            document.getElementById('rmBtn').style.display = 'none';
+            const filtered = cat ? inventoryData.filter(p => (p.cat || '').toLowerCase() === cat.toLowerCase()) : inventoryData;
+            filtered.forEach(p => {
+                const imgSrc = p.img || '';
+                const card = document.createElement('div');
+                card.className = 'remove-card';
+                card.style.cssText = 'border:2px solid var(--ink,#2b2b2b);border-radius:12px;padding:6px;cursor:pointer;text-align:center;background:var(--paper-front,#fff);';
+                card.innerHTML = `<img src="${imgSrc}" style="width:100%;height:50px;object-fit:cover;border-radius:8px;" onerror="this.style.display='none'"><div style="font-size:11px;font-weight:900;margin-top:4px;">${p.name || ''}</div><div style="font-size:10px;color:#666;">Qty: ${p.qty}</div>`;
+                card.onclick = () => {
+                    document.querySelectorAll('#removeProductGrid > div').forEach(c => {
+                        c.style.borderColor = 'var(--ink,#2b2b2b)';
+                        c.classList.remove('shake');
+                    });
+                    card.style.borderColor = '#ef4444';
+                    card.classList.add('shake');
+                    selectedRemoveId = p.id;
+                    selectedRemoveProduct = p;
+                    document.getElementById('rmBtn').style.display = 'block';
+                };
+                grid.appendChild(card);
+            });
+        }
+
+        function showRemoveConfirm() {
+            if (!selectedRemoveId) return;
+            const p = selectedRemoveProduct;
+            document.getElementById('rmConfirmName').innerText = p ? (p.name || '') : '';
+            document.getElementById('rmConfirmCode').innerText = p ? ('Code: ' + (p.id || '')) : '';
+            const img = document.getElementById('rmConfirmImg');
+            img.style.display = 'block';
+            if (p) img.src = p.img || '';
+            document.getElementById('removeConfirmModal').style.display = 'flex';
+        }
+
+        function closeRemoveConfirm() {
+            document.getElementById('removeConfirmModal').style.display = 'none';
+        }
+
+        async function confirmRemove() {
+            closeRemoveConfirm();
+            if (!selectedRemoveId) return;
+            try {
+                const form = new FormData();
+                form.append('id', selectedRemoveId);
+                form.append('csrf_token', getCsrfToken());
+                const res = await fetch('api/inventory_remove.php', { method: 'POST', body: form });
+                const data = await res.json();
+                if (data.ok) {
+                    // Animate the product card out after successful server removal
+                    const card = document.querySelector(`.inv-card[data-pid="${selectedRemoveId}"]`);
+                    if (card) {
+                        card.classList.add('deleting');
+                        await new Promise(r => setTimeout(r, 500));
+                    }
+                    showToast('Product removed', '🗑️');
+                    await loadInventory();
+                    filterRemoveProducts();
+                } else {
+                    showToast(data.error || 'Remove failed', '⚠️');
+                }
+            } catch (e) {
+                showToast('Remove failed', '⚠️');
+            }
+        }
+
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            loadInventory();
+        });
+
+        window.addEventListener('pageshow', (event) => {
+            if (event.persisted) {
+                loadInventory();
+            }
+        });
+    </script>
+</body>
+</html>

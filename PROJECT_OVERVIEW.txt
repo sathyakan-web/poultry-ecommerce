@@ -1,0 +1,483 @@
+================================================================================
+                     SAFEFLOCK SOLUTION — PROJECT OVERVIEW
+================================================================================
+
+PROJECT NAME   : SafeFlock Solution
+PROJECT TYPE   : Full-Stack Poultry E-Commerce & Supply-Chain Management Platform
+TECH STACK     : PHP 8+, MySQL, HTML5, CSS3, Vanilla JavaScript
+RUNTIME        : Apache (XAMPP) / any PHP-enabled web server
+DATABASE       : MySQL (default DB name: poultry_ecommerce)
+ENTRY PAGE     : login.php
+HOME PAGE      : index.php / index.html
+
+
+================================================================================
+                              WHAT THIS PROJECT DOES
+================================================================================
+
+SafeFlock Solution is an end-to-end digital platform for the Indian poultry
+industry. It connects poultry farmers, shop owners, healthcare product
+providers, and delivery partners in one system.
+
+CORE CAPABILITIES
+-----------------
+1. Product Catalog & E-Commerce
+   - Browse verified poultry products: vaccines, medicines, feed supplements,
+     water treatments, disinfectants.
+   - Each product has a unique SKU, price, description, and QR token for
+     traceability.
+   - Live inventory qty is shown in real time.
+
+2. Anti-Counterfeit QR Verification
+   - Every product carries a unique QR token.
+   - Users can scan or enter the token to verify authenticity.
+   - System returns VERIFIED / ORIGINAL or FAKE / UNVERIFIED.
+
+3. Role-Based Access Control (RBAC)
+   - customer : buy products, manage cart, place orders, scan QR
+   - provider : manage inventory, dispatch orders, assign logistics, print QR
+   - logistics : view deliveries, update order status, verify delivery OTP
+
+4. Cold-Chain IoT Monitoring
+   - ESP32 sensors upload temperature and humidity readings.
+   - Data is stored in MySQL and displayed on the IoT dashboard.
+   - Alerts can be sent via SMS if readings go out of range.
+
+5. Order & Delivery Management
+   - Customers place orders from cart.
+   - Providers dispatch orders and assign a logistics driver.
+   - Logistics updates delivery status and verifies OTP at customer site.
+
+6. OTP & Passkey Authentication
+   - SMS OTP login via Textbee.
+   - WebAuthn / passkey support for fingerprint / face login.
+   - CSRF protection on all POST requests.
+
+7. Utility Features
+   - Dosage calculator for flock medicine dosing.
+   - Returns & refunds management.
+   - Dark / light theme with doodle UI.
+   - PWA-ready (manifest.json, mobile-web-app-capable).
+
+
+================================================================================
+                              THREE USER ROLES
+================================================================================
+
+ROLE: CUSTOMER
+-------------
+Pages  : products.html / products.php, cart.php, orders.php, past_orders.php,
+         qr.php, verified_product.php, calculator.php, returns.php, settings.php
+Actions: browse shop, add to cart, place order, view order history, scan QR,
+         verify product, calculate dosage, request returns
+
+ROLE: PROVIDER
+--------------
+Pages  : provider_dashboard.php, provider_dashboard_live.php, inventory.html,
+         inventory.php, products.html, order_dispatch.php, print_qr_labels.php,
+         qr.php, settings.php
+Actions: manage inventory, add/edit products, dispatch orders, assign driver,
+         print QR labels, view low-stock alerts, scan QR
+
+ROLE: LOGISTICS
+--------------
+Pages  : logistics_hub.php, logistics_dashboard_spa.php, logistics.php,
+         logistics_route.php, qr.php, order_details.php, settings.php
+Actions: view assigned deliveries, update order status, verify delivery OTP,
+         scan QR at delivery, track route
+
+
+================================================================================
+                              FILE STRUCTURE BLUEPRINT
+================================================================================
+
+poultry-ecommerce/
+|
+|-- api/                         # JSON API ENDPOINTS (26 PHP files)
+|   |-- products.php             #   GET  - List products with inventory qty
+|   |-- products_upsert.php      #   POST - Add / update products (provider)
+|   |-- cart.php                 #   GET/POST - Cart operations (add/remove/qty)
+|   |-- orders.php               #   POST - Place orders, order history, status
+|   |-- inventory.php            #   GET  - View inventory stock levels
+|   |-- inventory_upsert.php     #   POST - Update inventory qty (provider)
+|   |-- verify_qr.php            #   GET  - Validate QR token against DB
+|   |-- iot_readings.php         #   GET  - Get IoT sensor readings
+|   |-- iot_upload.php           #   POST - Upload sensor reading (ESP32/bridge)
+|   |-- logistics_orders.php     #   POST - Logistics delivery orders & status
+|   |-- assign_driver.php        #   POST - Provider assigns driver to order
+|   |-- send_delivery_otp.php    #   POST - Send OTP to customer on dispatch
+|   |-- verify_delivery_otp.php  #   POST - Verify delivery OTP
+|   |-- provider_orders.php      #   GET  - Provider dispatch order view
+|   |-- provider_logistics.php   #   GET  - Provider logistics tracking
+|   |-- provider_low_stock.php   #   GET  - Low stock alerts for provider
+|   |-- auth_session.php         #   GET  - Current logged-in session info
+|   |-- check_login.php          #   GET  - Login status guard
+|   |-- settings.php             #   GET/POST - User profile & fingerprint
+|   |-- db.php                   #   -     - PDO database connection helper
+|   |-- sync_to_live.php         #   POST - Sync local data to live DB
+|   |-- sync_from_local.php      #   POST - Sync live data to local DB
+|   |-- top_product.php          #   GET  - Get top-selling product
+|   |-- webauthn_status.php      #   GET  - Check passkey registration status
+|   |-- send_temp_alert_sms.php  #   POST - Send temperature alert SMS
+|   |-- feed_meds_seed.php       #   POST - Seed feed & meds catalog data
+|
+|-- auth/                         # AUTHENTICATION & AUTHORIZATION (15 PHP files)
+|   |-- rbac.php                 #   -     - Role-based access control core
+|   |-- check_login.php          #   -     - Session guard wrapper
+|   |-- login.php                #   POST - Email/phone + password login
+|   |-- register.php             #   POST - New user registration
+|   |-- logout.php               #   POST - Destroy session
+|   |-- csrf.php                 #   -     - CSRF token generation/validation
+|   |-- audit.php                #   -     - Action audit logging
+|   |-- request_otp.php          #   POST - Send OTP via SMS (Textbee)
+|   |-- verify_otp.php           #   POST - Verify OTP code
+|   |-- textbee_send_sms.php     #   -     - SMS sending helper
+|   |-- passkey_login.php        #   POST - Passkey login flow
+|   |-- webauthn_login_start.php #   GET  - WebAuthn login start
+|   |-- webauthn_login_finish.php#   POST - WebAuthn login finish
+|   |-- webauthn_register_start.php # GET - WebAuthn registration start
+|   |-- webauthn_register_finish.php# POST - WebAuthn registration finish
+|   |-- webauthn_helpers.php     #   -     - WebAuthn helper functions
+|   |-- webauthn_reset.php       #   POST - Remove passkey credentials
+|   |-- reset_password.php       #   POST - Password reset flow
+|
+|-- db/                            # DATABASE CONFIGURATION
+|   |-- config.php               #   -     - MySQL connection, env-based config
+|   |-- migrate.php              #   -     - Database migration runner
+|   |-- migrations/              #   -     - Individual migration scripts
+|       |-- run_add_synced_at.php
+|       |-- run_add_products_updated_at.php
+|   |-- check_columns.php
+|
+|-- config/                            # SHARED DEPLOYMENT CONFIG (not synced to live)
+|   |-- sfs/sfs_config.php           #   -     - TextBee SMS key + device id (git-ignored)
+|
+|-- tools/                             # DIAGNOSTICS (CLI only)
+|   |-- sms_test.php                 #   -     - Send test SMS, check delivery batch / history
+|
+|-- js/                            # FRONTEND JAVASCRIPT (21 files)
+|   |-- app.js                   #   -     - Main app logic
+|   |-- theme.js                 #   -     - Dark/light theme toggle
+|   |-- mobile-dock.js           #   -     - Mobile bottom dock navigation
+|   |-- route-guard.js           #   -     - Client-side route protection
+|   |-- products.js              #   -     - Product listing & cart logic
+|   |-- (other JS files)
+|
+|-- css/                           # STYLESHEETS (7 CSS files)
+|   |-- style.css                #   -     - Base styles
+|   |-- doodle.css               #   -     - Doodle/paper theme
+|   |-- loading.css              #   -     - Loading animations
+|   |-- products-modal.css       #   -     - Product modal styles
+|   |-- rbac.css                 #   -     - Role-based UI styles
+|   |-- orders.css               #   -     - Orders page styles
+|   |-- (other CSS files)
+|
+|-- images/                        # LOGOS, ICONS, FAVICONS
+|   |-- sfs_logo.png
+|   |-- sfs_icon.png / sfs_icon-*.png
+|   |-- favicon.ico
+|
+|-- uploads/                       # PRODUCT IMAGES (54 files)
+|   |-- WTR-*, VCX-*, MED-*, FEED-*, FMD-*, NEW-* (product photos)
+|
+|-- docs/                          # DOCUMENTATION
+|   |-- dock-rules.md            #   -     - Mobile dock navigation rules
+|
+|-- partials/                      # REUSABLE PHP SNIPPETS
+|   |-- sidebar-toggle.php       #   -     - Sidebar toggle component
+|
+|-- scripts/                       # BUILD / UTILITY SCRIPTS
+|
+|-- .htaccess                      # Apache URL rewrites & security headers
+|-- robots.txt                     # Search engine crawler rules
+|-- sitemap.xml                    # SEO sitemap
+|-- manifest.json                  # PWA manifest
+|-- package.json                   # Node.js dependencies (png-to-ico, sharp)
+|-- package-lock.json              # Locked dependency versions
+|-- fiveserver.config.js           # FiveServer dev server config
+|-- .gitignore                     # Git ignore rules
+|-- googlec743f7f4f5db8391.html    # Google site verification
+|
+|-- *.php / *.html                 # APPLICATION PAGES (see below)
+
+
+================================================================================
+                              APPLICATION PAGES BLUEPRINT
+================================================================================
+
+PUBLIC PAGES (No login required)
+---------------------------------
+index.php / index.html    -> Home / Landing page (doodle theme, role-aware)
+login.php                 -> Login & Registration portal (email, OTP, passkey)
+
+CUSTOMER PAGES (Requires customer role)
+---------------------------------------
+products.php / products.html -> Product shop / catalog
+cart.php                    -> Shopping cart & checkout
+orders.php                  -> My orders list
+past_orders.php             -> Past order history
+order_details.php           -> Detailed order view
+calculator.php              -> Flock dosage calculator
+qr.php                      -> QR code scanner / verifier
+verified_product.php        -> Verified product detail page
+verification.php            -> Legacy QR verification (deprecated)
+returns.php                 -> Returns & refunds management
+settings.php                -> Profile & passkey settings
+
+PROVIDER PAGES (Requires provider role)
+---------------------------------------
+provider_dashboard.php      -> Main provider dashboard (dispatch, orders, stock)
+provider_dashboard_live.php -> Live provider dashboard view
+inventory.php / inventory.html      -> Inventory management
+inventory_mobile.html       -> Mobile inventory view
+inventory_live.html         -> Live inventory dashboard
+order_dispatch.php          -> Order dispatch management
+print_qr_labels.php         -> Batch print QR labels for products
+qr.php                     -> QR scanner (shared)
+settings.php               -> Profile & passkey settings
+
+LOGISTICS PAGES (Requires logistics role)
+-----------------------------------------
+logistics.php              -> Logistics orders (delivery view)
+logistics_hub.php    -> Logistics dashboard (map, routes)
+logistics_dashboard_spa.php-> Single-page logistics dashboard
+logistics_route.php        -> Delivery route management
+order_details.php          -> Detailed order view
+qr.php                     -> QR scanner at delivery
+settings.php               -> Profile & passkey settings
+
+SHARED PAGES (Multiple roles)
+------------------------------
+iot.php / iot.html         -> IoT cold-chain monitoring (customer/provider/logistics)
+home.html                  -> Alternative home page fallback
+403.php                    -> Access denied / forbidden page
+
+UTILITY / SYSTEM PAGES
+----------------------
+check_schema.php           -> Check database schema
+check_products_schema.php  -> Check products table schema
+check_drivers.php          -> Check driver assignments
+check_pending.php          -> Check pending orders
+qr_clean.php               -> Clean / reset QR data
+make_live_inventory.php    -> Sync inventory to live DB
+make_live_provider_dashboard.php -> Sync provider dashboard to live DB
+verified_product.php       -> Show verified product page
+order_dispatch.php         -> Dispatch order management
+order_details.php          -> Order detail view
+
+
+================================================================================
+                              DATABASE SCHEMA OVERVIEW
+================================================================================
+
+KEY TABLES
+----------
+users
+  - id, phone, full_name, email, role, password_hash, biometric_enabled, created_at
+
+products
+  - id, sku, name, category, description, price, size, logo_path, created_at, updated_at
+
+inventory
+  - id, product_id, qty, created_at, updated_at
+
+carts
+  - id, user_id, product_id, qty, created_at
+
+orders
+  - id, user_id, total, status, created_at, updated_at
+
+order_dispatch_items
+  - id, order_id, product_id, user_id, assigned_driver_id, status,
+    delivery_address, delivery_otp, otp_verified, updated_at
+
+qr_tokens
+  - id, token, product_id, batch_no, iot_status, created_at
+
+iot_readings
+  - id, product_id, reading_type, value, status, recorded_at
+
+webauthn_credentials
+  - id, user_id, credential_id, public_key, created_at
+
+audit_log
+  - id, user_id, action, details, ip_address, created_at
+
+
+================================================================================
+                              API ENDPOINT REFERENCE
+================================================================================
+
+BASE URL: /poultry-ecommerce/api/
+
+ENDPOINT                           METHOD  PURPOSE
+----------------------------------  ------  --------------------------------
+/products.php                      GET     List products with stock qty
+/products_upsert.php               POST    Add or update product (provider)
+/cart.php                          GET     Get user cart
+/cart.php                          POST    Add/remove/update cart item
+/orders.php                        POST    Place order, get order history
+/inventory.php                     GET     View inventory levels
+/inventory_upsert.php              POST    Update inventory qty (provider)
+/verify_qr.php                     GET     Validate QR token (returns JSON)
+/iot_readings.php                  GET     Get sensor readings (temp/humidity)
+/iot_upload.php                    POST    Upload sensor reading
+/logistics_orders.php              POST    List/update delivery orders
+/assign_driver.php                 POST    Assign driver to order
+/send_delivery_otp.php             POST    Send OTP to customer
+/verify_delivery_otp.php           POST    Verify delivery OTP
+/provider_orders.php               GET     Provider dispatch view
+/provider_logistics.php            GET     Provider logistics tracking
+/provider_low_stock.php            GET     Low stock alert list
+/auth_session.php                  GET     Current session info
+/check_login.php                   GET     Login status guard
+/settings.php                      GET/POST Profile settings, fingerprint
+/db.php                            -       PDO connection helper
+/sync_to_live.php                  POST    Sync local -> live DB
+/sync_from_local.php               POST    Sync live -> local DB
+/top_product.php                   GET     Top selling product
+/webauthn_status.php               GET     Passkey registration status
+/send_temp_alert_sms.php           POST    Send temp alert SMS
+/feed_meds_seed.php                POST    Seed feed/meds catalog
+
+
+================================================================================
+                              TECHNOLOGY & DESIGN PATTERNS
+================================================================================
+
+BACKEND
+-------
+- PHP 8+ with PDO for database access
+- Session-based authentication with HttpOnly cookies
+- CSRF tokens on all mutating requests
+- Role-based route guards (sfs_require_role)
+- Input sanitization and prepared statements (SQL injection prevention)
+- Audit logging for sensitive actions
+
+FRONTEND
+--------
+- Vanilla JavaScript (no framework dependency)
+- Fetch API for AJAX calls to JSON endpoints
+- CSS custom properties for theming (light/dark)
+- Doodle / paper-cutout UI theme (Comic Neue, Gochi Hand fonts)
+- Responsive grid layouts for product catalogs
+- Mobile bottom dock navigation (role-aware)
+- QR scanner integration
+
+DATABASE
+--------
+- MySQL with InnoDB engine
+- Foreign keys: products -> inventory, orders -> order_dispatch_items
+- Indexed columns: sku, token, user_id, product_id
+- Timestamps on all tables (created_at, updated_at)
+
+SECURITY
+--------
+- CSRF protection (sfs_csrf_check)
+- SQL injection prevention (PDO prepared statements)
+- XSS prevention (htmlspecialchars on output)
+- Session fixation protection (session_regenerate_id)
+- HttpOnly + SameSite cookies
+- OTP-based auth (Textbee SMS)
+- WebAuthn passkey support
+- Audit trail for QR scans and sensitive actions
+
+
+================================================================================
+                              DEPLOYMENT & CONFIGURATION
+================================================================================
+
+LOCAL DEVELOPMENT (XAMPP)
+--------------------------
+1. Install XAMPP with PHP 8+ and MySQL
+2. Create database: poultry_ecommerce
+3. Import schema and seed data
+4. Place project in: C:\xampp\htdocs\sfs\poultry-ecommerce\
+5. Access via: http://localhost/sfs/poultry-ecommerce/login.php
+6. Default local DB credentials (from db/config.php):
+   - Host: localhost
+   - Port: 3306
+   - User: root
+   - Password: (empty)
+   - DB: poultry_ecommerce
+
+LIVE DEPLOYMENT
+---------------
+- Production credentials loaded from: config/sfs/sfs_config.php (outside webroot)
+- Environment variables can override any config value
+- Base URL auto-detected from HTTP_HOST
+- robots.txt and sitemap.xml configured for SEO
+
+ENVIRONMENT VARIABLES (optional)
+---------------------------------
+DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASS
+DB_CHARSET (default: utf8mb4)
+SFS_BASE_URL
+SFS_CONFIG_PATH
+TEXTBEE_API_KEY, TEXTBEE_DEVICE_ID
+
+
+================================================================================
+                              KEY WORKFLOWS
+================================================================================
+
+1. CUSTOMER BUYS PRODUCT
+   Browse products -> Add to cart -> Checkout -> Place order -> Provider sees order
+   -> Provider dispatches -> Logistics delivers -> Delivery OTP verified
+
+2. PROVIDER DISPATCHES ORDER
+   Login as provider -> View orders in dashboard -> Assign driver -> Send OTP
+   -> Logistics picks up -> Update status -> Deliver -> Customer receives OTP
+
+3. QR VERIFICATION
+   Scan QR code (or enter token) -> System checks qr_tokens table -> Returns
+   product name, SKU, batch, IoT status -> Shows VERIFIED or FAKE badge
+
+4. IoT MONITORING
+   ESP32 sensor reads temp -> Publishes to MQTT (HiveMQ) -> Bridge server
+   receives -> POSTs to iot_upload.php -> Stored in iot_readings table ->
+   Displayed on IoT dashboard with status OK/WARNING/CRITICAL
+
+
+================================================================================
+                              PROJECT STATISTICS
+================================================================================
+
+Total Project Files (excluding node_modules & .kilo): 207
+PHP Files     : 81
+HTML Files    : 12
+JS Files      : 21
+CSS Files     : 7
+SQL Files     : 11
+JSON Files    : 6
+Markdown Docs : 3
+Images        : 54 (JPG/PNG/ICO)
+
+API Endpoints : 26 JSON/POST endpoints
+Auth Files    : 15 authentication & RBAC files
+Page Controllers: 20+ PHP page files
+Frontend Pages: 12 HTML pages
+Database Tables: 10+ core tables
+
+
+================================================================================
+                              CONCLUSION
+================================================================================
+
+SafeFlock Solution is a production-ready poultry e-commerce platform with
+supply-chain traceability, role-based access, IoT integration, and anti-counterfeit
+QR verification. It demonstrates full-stack PHP development, database design,
+REST API design, security best practices, and modern frontend UX with a unique
+doodle-themed interface.
+
+The project is suitable for academic submission as it covers:
+- Backend: PHP, MySQL, PDO, session management, RBAC
+- Frontend: HTML5, CSS3, JavaScript, responsive design
+- API: RESTful JSON endpoints, AJAX integration
+- Security: CSRF, XSS prevention, SQL injection prevention, OTP, WebAuthn
+- IoT: ESP32, MQTT, sensor data integration
+- Database: Schema design, relationships, indexing
+
+================================================================================
+                              END OF DOCUMENT
+================================================================================

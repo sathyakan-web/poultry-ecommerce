@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="google-site-verification" content="HVPLIymb5W4tDW05h4O_nn6wM-gpXJNpfeX-iTbl7BY" />
+  <meta name="description" content="SafeFlock Solution - India's trusted poultry e-commerce platform for healthcare products, feed, vaccines, and logistics management. Verified quality with QR traceability." />
+  <link rel="canonical" href="https://safeflocksolutions.freedev.app/">
+  <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="192x192" href="images/sfs_icon-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="images/sfs_icon-512x512.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="images/sfs_icon-180x180.png">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#d4af37">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>SafeFlock Solution - Home</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/loading.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/doodle.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&family=Gochi+Hand&display=swap" rel="stylesheet">
+  <script src="js/theme.js"></script>
+  <style>
+    :root {
+      --ink: #2b2b2b;
+      --paper-front: #ffffff;
+      --paper-back: #f8f9fa;
+      --paper-yellow: #fffdf5;
+      --bg-body: #e9ecef;
+      --primary-btn: #ffe66d;
+      --primary-hover: #ffd166;
+      --secondary-btn: #4ecdc4;
+      --action-btn: #ff6b6b;
+      --success: #06d6a0;
+      --dock-bg: #ffffff;
+      --border-width: 3px;
+      --shadow-offset: 6px;
+      --grid-line-color: rgba(0,0,0,0.04);
+      --sketch-r1: 4px 20px 6px 20px / 20px 6px 20px 4px;
+      --sketch-r2: 20px 4px 20px 6px / 4px 20px 6px 20px;
+      --sketch-btn: 12px 18px 12px 18px / 18px 12px 18px 12px;
+      --dock-radius: 40px 50px 45px 55px / 55px 45px 50px 40px;
+      --font-ui: 'Comic Neue', 'Comic Sans MS', sans-serif;
+      --font-display: 'Gochi Hand', 'Marker Felt', cursive;
+    }
+
+    body.dark-theme {
+      --ink: #f0f0f0;
+      --paper-front: #1a1a2e;
+      --paper-back: #16213e;
+      --paper-yellow: #0f3460;
+      --bg-body: #0d0d1a;
+      --primary-btn: #e94560;
+      --primary-hover: #d1304d;
+      --secondary-btn: #4ecdc4;
+      --dock-bg: #1a1a2e;
+      --grid-line-color: rgba(255,255,255,0.05);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; transition: background-color 0.4s ease, border-color 0.4s ease, color 0.4s ease; }
+
+    body {
+      font-family: var(--font-ui);
+      background-color: var(--bg-body);
+      color: var(--ink);
+      min-height: 100vh;
+      overflow-x: hidden;
+      background-image: linear-gradient(var(--grid-line-color) 2px, transparent 2px), linear-gradient(90deg, var(--grid-line-color) 2px, transparent 2px);
+      background-size: 40px 40px;
+      background-position: center;
+    }
+
+    .desk-container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 30px 20px 140px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+    }
+
+    .top-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .brand-logo-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      transform: rotate(-1deg);
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .brand-logo-container:hover { transform: rotate(2deg) scale(1.05); }
+
+    .logo-image-wrapper {
+      width: 96px;
+      height: 96px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 12px;
+      box-shadow: none;
+      background: transparent;
+      padding: 0;
+    }
+
+    .logo-image-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      animation: gentle-bob 3s infinite ease-in-out;
+    }
+
+    @keyframes gentle-bob {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-3px); }
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+    }
+    .brand-text-main {
+      font-family: var(--font-display);
+      font-size: 32px;
+      font-weight: bold;
+      color: var(--ink);
+      line-height: 1;
+      letter-spacing: 1px;
+      text-shadow: 2px 2px 0px rgba(0,0,0,0.1);
+    }
+    .brand-text-sub {
+      font-size: 14px;
+      font-weight: 900;
+      color: var(--action-btn);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      padding-left: 2px;
+    }
+
+    .theme-switch-wrapper {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 100;
+    }
+    .theme-switch {
+      --toggle-size: 10px;
+      --container-width: 4.5em;
+      --container-height: 2em;
+      --container-radius: 6.25em;
+      --container-light-bg: #3D7EAE;
+      --container-night-bg: #1D1F2C;
+      --circle-container-diameter: 2.75em;
+      --sun-moon-diameter: 1.75em;
+      --sun-bg: #ECCA2F;
+      --moon-bg: #C4C9D1;
+      --spot-color: #959DB1;
+      --circle-container-offset: calc((var(--circle-container-diameter) - var(--container-height)) / 2 * -1);
+      --stars-color: #fff;
+      --clouds-color: #F3FDFF;
+      --back-clouds-color: #AACADF;
+      --transition: .5s cubic-bezier(0, -0.02, 0.4, 1.25);
+      --circle-transition: .3s cubic-bezier(0, -0.02, 0.35, 1.17);
+    }
+    .theme-switch, .theme-switch *, .theme-switch *::before, .theme-switch *::after {
+      box-sizing: border-box; margin: 0; padding: 0; font-size: var(--toggle-size);
+    }
+    .theme-switch__container {
+      width: var(--container-width); height: var(--container-height); background-color: var(--container-light-bg);
+      border-radius: var(--container-radius); overflow: hidden; cursor: pointer;
+      box-shadow: 0em -0.062em 0.062em rgba(0, 0, 0, 0.25), 0em 0.062em 0.125em rgba(255, 255, 255, 0.94);
+      transition: var(--transition); position: relative; border: 2px solid var(--ink);
+    }
+    .theme-switch__container::before {
+      content: ""; position: absolute; z-index: 1; inset: 0;
+      box-shadow: 0em 0.05em 0.187em rgba(0, 0, 0, 0.25) inset, 0em 0.05em 0.187em rgba(0, 0, 0, 0.25) inset;
+      border-radius: var(--container-radius);
+    }
+    .theme-switch__checkbox { display: none; }
+    .theme-switch__circle-container {
+      width: var(--circle-container-diameter); height: var(--circle-container-diameter); background-color: rgba(255, 255, 255, 0.1);
+      position: absolute; left: var(--circle-container-offset); top: var(--circle-container-offset);
+      border-radius: var(--container-radius);
+      box-shadow: inset 0 0 0 3.375em rgba(255, 255, 255, 0.1), inset 0 0 0 3.375em rgba(255, 255, 255, 0.1), 0 0 0 0.625em rgba(255, 255, 255, 0.1), 0 0 0 1.25em rgba(255, 255, 255, 0.1);
+      display: flex; transition: var(--circle-transition); pointer-events: none;
+    }
+    .theme-switch__sun-moon-container {
+      pointer-events: auto; position: relative; z-index: 2; width: var(--sun-moon-diameter); height: var(--sun-moon-diameter);
+      margin: auto; border-radius: var(--container-radius); background-color: var(--sun-bg);
+      box-shadow: 0.062em 0.062em 0.062em 0em rgba(254, 255, 239, 0.61) inset, 0em -0.062em 0.062em 0em #a1872a inset;
+      filter: drop-shadow(0.062em 0.125em 0.125em rgba(0, 0, 0, 0.25)) drop-shadow(0em 0.062em 0.125em rgba(0, 0, 0, 0.25));
+      overflow: hidden; transition: var(--transition);
+    }
+    .theme-switch__moon {
+      transform: translateX(100%); width: 100%; height: 100%; background-color: var(--moon-bg); border-radius: inherit;
+      box-shadow: 0.062em 0.062em 0.062em 0em rgba(254, 255, 239, 0.61) inset, 0em -0.062em 0.062em 0em #969696 inset;
+      transition: var(--transition); position: relative;
+    }
+    .theme-switch__spot {
+      position: absolute; top: 0.75em; left: 0.312em; width: 0.75em; height: 0.75em; border-radius: var(--container-radius);
+      background-color: var(--spot-color); box-shadow: 0em 0.0312em 0.062em rgba(0, 0, 0, 0.25) inset;
+    }
+    .theme-switch__spot:nth-of-type(2) { width: 0.375em; height: 0.375em; top: 0.937em; left: 1.375em; }
+    .theme-switch__spot:nth-last-of-type(3) { width: 0.25em; height: 0.25em; top: 0.312em; left: 0.812em; }
+    .theme-switch__clouds {
+      width: 1.25em; height: 1.25em; background-color: var(--clouds-color); border-radius: var(--container-radius);
+      position: absolute; bottom: -0.625em; left: 0.312em;
+      box-shadow: 0.937em 0.312em var(--clouds-color), -0.312em -0.312em var(--back-clouds-color), 1.437em 0.375em var(--clouds-color), 0.5em -0.125em var(--back-clouds-color), 2.187em 0 var(--clouds-color), 1.25em -0.062em var(--back-clouds-color), 2.937em 0.312em var(--clouds-color), 2em -0.312em var(--back-clouds-color), 3.625em -0.062em var(--clouds-color), 2.625em 0em var(--back-clouds-color), 4.5em -0.312em var(--clouds-color), 3.375em -0.437em var(--back-clouds-color), 4.625em -1.75em 0 0.437em var(--clouds-color), 4em -0.625em var(--back-clouds-color), 4.125em -2.125em 0 0.437em var(--back-clouds-color);
+      transition: 0.5s cubic-bezier(0, -0.02, 0.4, 1.25);
+    }
+    .theme-switch__stars-container {
+      position: absolute; color: var(--stars-color); top: -100%; left: 0.312em; width: 2.75em; height: auto; transition: var(--transition);
+    }
+    .theme-switch__checkbox:checked + .theme-switch__container { background-color: var(--container-night-bg); }
+    .theme-switch__checkbox:checked + .theme-switch__container .theme-switch__circle-container { left: calc(100% - var(--circle-container-offset) - var(--circle-container-diameter)); }
+    .theme-switch__checkbox:checked + .theme-switch__container .theme-switch__circle-container:hover { left: calc(100% - var(--circle-container-offset) - var(--circle-container-diameter) - 0.187em) }
+    .theme-switch__circle-container:hover { left: calc(var(--circle-container-offset) + 0.187em); }
+    .theme-switch__checkbox:checked + .theme-switch__container .theme-switch__moon { transform: translate(0); }
+    .theme-switch__checkbox:checked + .theme-switch__container .theme-switch__clouds { bottom: -4.062em; }
+    .theme-switch__checkbox:checked + .theme-switch__container .theme-switch__stars-container { top: 50%; transform: translateY(-50%); }
+
+    .doodle-card {
+      background: var(--paper-front);
+      border: var(--border-width) solid var(--ink);
+      box-shadow: var(--shadow-offset) var(--shadow-offset) 0px var(--ink);
+      padding: 30px;
+      position: relative;
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s;
+      background-image: repeating-linear-gradient(transparent, transparent 28px, rgba(128, 128, 128, 0.1) 28px, rgba(128, 128, 128, 0.1) 30px);
+      background-position: 0 10px;
+    }
+    .doodle-card:hover {
+      transform: translateY(-4px) rotate(1deg) scale(1.01);
+      box-shadow: 8px 8px 0px var(--ink);
+    }
+
+    .card-r1 { border-radius: var(--sketch-r1); transform: rotate(-0.5deg); }
+    .card-r2 { border-radius: var(--sketch-r2); transform: rotate(0.5deg); background-color: var(--paper-yellow); }
+
+    .washi-tape {
+      position: absolute;
+      height: 30px;
+      width: 120px;
+      background-color: rgba(78, 205, 196, 0.4);
+      border: 1.5px solid rgba(0,0,0,0.2);
+      z-index: 10;
+    }
+
+    .card-title {
+      font-family: var(--font-display);
+      font-size: 32px;
+      color: var(--ink);
+      margin-bottom: 15px;
+      line-height: 1.2;
+    }
+    .card-text {
+      font-size: 18px;
+      font-weight: bold;
+      color: var(--ink);
+      opacity: 0.8;
+      line-height: 1.6;
+      margin-bottom: 25px;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .doodle-btn {
+      font-family: var(--font-ui);
+      font-size: 18px;
+      font-weight: 900;
+      padding: 12px 24px;
+      border: var(--border-width) solid var(--ink);
+      border-radius: var(--sketch-btn);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 4px 4px 0px var(--ink);
+      transition: all 0.1s;
+      color: var(--ink);
+      text-decoration: none;
+    }
+    .doodle-btn:active {
+      transform: translate(4px, 4px);
+      box-shadow: 0px 0px 0px var(--ink);
+    }
+    .btn-yellow { background-color: var(--primary-btn); transform: rotate(-1deg); }
+    .btn-yellow:hover { background-color: var(--primary-hover); }
+    .btn-blue { background-color: var(--secondary-btn); transform: rotate(1deg); }
+    .btn-blue:hover { filter: brightness(0.9); }
+
+    .bento-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+    }
+
+    .featured-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      background-color: var(--paper-yellow);
+    }
+    @media (min-width: 768px) {
+      .featured-card { flex-direction: row; text-align: left; }
+      .featured-card > div:last-child { text-align: left !important; align-items: flex-start !important; }
+      .featured-card .btn-group-center { justify-content: flex-start !important; }
+    }
+
+    .sunburst {
+      position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 180px; height: 180px;
+      border: 3px dashed var(--action-btn); border-radius: 50%; opacity: 0.4; animation: spin-slow 15s linear infinite; pointer-events: none;
+    }
+    @keyframes spin-slow { 100% { transform: translate(-50%, -50%) rotate(360deg); } }
+
+    .product-sketch {
+      width: 120px; height: 150px; flex-shrink: 0; position: relative; z-index: 2; transform: rotate(-2deg); transition: transform 0.3s;
+      background-color: var(--success); border: var(--border-width) solid var(--ink); border-radius: var(--sketch-r2);
+      box-shadow: 5px 5px 0px rgba(0,0,0,0.3); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px;
+    }
+    .product-sketch::before {
+      content: ""; position: absolute; top: 5px; bottom: 5px; left: 5px; right: 5px; border: 2px dashed var(--ink); border-radius: 8px; opacity: 0.5;
+    }
+    .product-sketch:hover { transform: scale(1.05) rotate(2deg); }
+
+    .price-tag {
+      display: inline-block; background: var(--action-btn); color: white; border: 2px solid var(--ink); padding: 5px 15px;
+      border-radius: 15px; font-size: 24px; font-weight: 900; transform: rotate(-3deg); margin: 10px 0;
+      box-shadow: 2px 2px 0px var(--ink);
+    }
+
+    .plus-one {
+      position: absolute; font-family: var(--font-display); font-size: 28px; font-weight: 900; color: var(--action-btn);
+      pointer-events: none; animation: float-up-fade 0.8s ease-out forwards; z-index: 100;
+      text-shadow: 2px 2px 0px var(--ink);
+    }
+    @keyframes float-up-fade {
+      0% { opacity: 1; transform: translateY(0) scale(1); }
+      100% { opacity: 0; transform: translateY(-40px) scale(1.5); }
+    }
+
+    .web-dock-container {
+      position: fixed; bottom: 30px; left: 0; right: 0;
+      display: flex; justify-content: center; pointer-events: none; z-index: 1000;
+    }
+
+    .flock-dock {
+      pointer-events: auto;
+      background-color: var(--dock-bg);
+      border: var(--border-width) solid var(--ink);
+      border-radius: var(--dock-radius);
+      box-shadow: 0px 10px 0px var(--ink), 0px 20px 30px rgba(0,0,0,0.2);
+      display: flex; align-items: center; padding: 10px 15px;
+      height: 85px; width: 90%; max-width: 650px; position: relative;
+    }
+
+    .nav-item {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-decoration: none; color: var(--ink); flex: 1; height: 100%; position: relative;
+      z-index: 2; cursor: pointer; transition: transform 0.2s;
+    }
+
+    .icon-container { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; margin-bottom: 4px; }
+    .nav-item svg {
+      width: 28px; height: 28px; fill: none; stroke: var(--ink); stroke-width: 2.5;
+      stroke-linecap: round; stroke-linejoin: round; transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+    .nav-label { font-size: 12px; font-weight: 900; }
+
+    .active-indicator {
+      position: absolute; height: 70px; background-color: var(--primary-btn);
+      border: 2px dashed var(--ink); border-radius: 30px 40px 30px 40px / 40px 30px 40px 30px;
+      box-shadow: 2px 2px 0px var(--ink); top: 5px; z-index: 1;
+      transition: left 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      animation: squish-dock 4s infinite alternate;
+    }
+
+    .nav-item.active { color: var(--ink); }
+    .nav-item.active svg {
+      transform: translateY(-5px) scale(1.15) rotate(-5deg);
+      filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.1));
+    }
+    .nav-item.logout svg { stroke: var(--action-btn); }
+    .nav-item.logout .nav-label { color: var(--action-btn); }
+
+    @keyframes squish-dock {
+      0% { border-radius: 30px 40px 30px 40px / 40px 30px 40px 30px; }
+      100% { border-radius: 40px 30px 40px 30px / 30px 40px 30px 40px; }
+    }
+
+    @media (max-width: 768px) {
+      .desk-container { padding-bottom: 120px; }
+      .flock-dock { width: 95%; height: 75px; padding: 5px; }
+      .nav-item svg { width: 24px; height: 24px; }
+      .nav-label { font-size: 10px; }
+      .active-indicator { height: 60px; top: 5px; }
+      .brand-text-main { font-size: 24px; }
+    }
+
+    .product-of-week-error {
+      text-align: center; padding: 20px; color: #ef4444; font-weight: 900;
+    }
+  </style>
+</head>
+<body>
+
+  <main class="desk-container">
+    <div class="top-header">
+      <a href="index.php" class="brand-logo-container">
+        <div class="logo-image-wrapper">
+           <img src="images/sfs_icon.png" alt="SafeFlock Solution Logo" onerror="this.src='https://placehold.co/100x100/161616/fbbf24?text=SF'">
+        </div>
+        <div class="brand-text">
+          <span class="brand-text-main">SafeFlock Solution</span>
+          <span class="brand-text-sub">SafeFlock Solution</span>
+        </div>
+      </a>
+
+      <div class="theme-switch-wrapper">
+        <label class="theme-switch">
+          <input type="checkbox" class="theme-switch__checkbox" id="themeToggle">
+          <div class="theme-switch__container">
+            <div class="theme-switch__clouds"></div>
+            <div class="theme-switch__stars-container">
+              <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 144 55" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M32 4.41L30.13 0H28.76L26.9 4.41L22.5 6.27V7.64L26.9 9.5L28.76 13.91H30.13L32 9.5L36.4 7.64V6.27L32 4.41ZM114 43.14L112.13 38.72H110.76L108.9 43.14L104.5 45V46.36L108.9 48.23L110.76 52.64H112.13L114 48.23L118.4 46.36V45L114 43.14ZM98.4 20L97.03 16.73H96L94.63 20L91.36 21.36V22.45L94.63 23.82L96 27.09H97.03L98.4 23.82L101.67 22.45V21.36L98.4 20ZM72.63 5.45L71.8 3.5H71L70.2 5.45L68.27 6.27V7.09L70.2 7.9L71 9.86H71.8L72.63 7.9L74.54 7.09V6.27L72.63 5.45ZM40.9 31.81L40 29.63H39.18L38.27 31.81L36.09 32.72V33.54L38.27 34.45L39.18 36.63H40L40.9 34.45L43.09 33.54V32.72L40.9 31.81Z" fill="currentColor"></path></svg>
+            </div>
+            <div class="theme-switch__circle-container">
+              <div class="theme-switch__sun-moon-container">
+                <div class="theme-switch__moon">
+                  <div class="theme-switch__spot"></div>
+                  <div class="theme-switch__spot"></div>
+                  <div class="theme-switch__spot"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <div class="doodle-card card-r1" style="text-align: center; padding: 40px 20px;">
+      <div class="washi-tape" style="top: -15px; left: 50px; transform: rotate(-4deg); background-color: rgba(255, 209, 102, 0.6);"></div>
+      <div class="washi-tape" style="top: -10px; right: 40px; transform: rotate(5deg);"></div>
+      <h1 class="card-title" style="font-size: 42px; margin-bottom: 10px;">Welcome to SafeFlock Solution</h1>
+      <p class="card-text" style="max-width: 600px; margin: 0 auto 30px auto;">
+        Your Trusted Poultry E-Commerce Platform with complete traceability and verified quality.
+      </p>
+      <div class="btn-group" style="justify-content: center;">
+        <a href="products.php" class="doodle-btn btn-yellow">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+          Shop Now
+        </a>
+        <a href="qr.php" class="doodle-btn btn-blue">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>
+          Verify Product
+        </a>
+      </div>
+    </div>
+
+    <div style="margin-top: 10px;">
+      <h2 style="font-family: var(--font-display); font-size: 32px; text-align: center; margin-top: 20px;">Product of the Week</h2>
+      <p style="text-align: center; font-weight: bold; margin-bottom: 20px; opacity: 0.8;">Dynamically updated based on this week's highest sales volume!</p>
+      <div class="doodle-card featured-card card-r2" id="product-of-week-card" style="position: relative; overflow: hidden;">
+        <div class="washi-tape" style="top: -10px; right: 40px; transform: rotate(10deg); background-color: rgba(239, 71, 111, 0.4);"></div>
+        <div id="product-of-week-content">
+          <div class="product-of-week-loading">Loading Product of the Week...</div>
+        </div>
+      </div>
+    </div>
+
+    <h2 style="font-family: var(--font-display); font-size: 28px; text-align: center; margin-top: 20px;">Why Choose SafeFlock Solution?</h2>
+    <p style="text-align: center; font-weight: bold; margin-bottom: 10px; opacity: 0.8;">Quality poultry products with complete traceability</p>
+
+    <div class="bento-grid">
+      <div class="doodle-card card-r2" style="text-align: center;">
+        <div class="washi-tape" style="top: -12px; left: 50%; transform: translateX(-50%) rotate(2deg); background-color: rgba(239, 71, 111, 0.4); width: 80px;"></div>
+        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#ef476f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin: 10px auto; display: block; fill: rgba(239, 71, 111, 0.2);">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          <polyline points="9 12 11 14 15 10" stroke="#323232" stroke-width="3"></polyline>
+        </svg>
+        <h3 class="card-title" style="font-size: 24px; margin-bottom: 10px;">Verified Quality</h3>
+        <p class="card-text" style="font-size: 15px;">All products are verified with QR codes for complete transparency and safety.</p>
+      </div>
+
+      <div class="doodle-card card-r1" style="text-align: center;">
+        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#4ecdc4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin: 10px auto; display: block; fill: rgba(78, 205, 196, 0.2);">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14" stroke="#323232" stroke-width="3"></polyline>
+        </svg>
+        <h3 class="card-title" style="font-size: 24px; margin-bottom: 10px;">Fast Delivery</h3>
+        <p class="card-text" style="font-size: 15px;">Our dedicated logistics network ensures your flock gets what they need, on time.</p>
+      </div>
+
+      <div class="doodle-card card-r2" style="text-align: center;">
+        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#ff9f1c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin: 10px auto; display: block; fill: rgba(255, 159, 28, 0.2);">
+          <path d="M3 3v18h18"></path>
+          <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14" stroke="#323232" stroke-width="3"></path>
+        </svg>
+        <h3 class="card-title" style="font-size: 24px; margin-bottom: 10px;">Health Tracking</h3>
+        <p class="card-text" style="font-size: 15px;">Monitor dosages, inventory, and flock health via our integrated IoT platform.</p>
+      </div>
+    </div>
+  </main>
+
+  <div class="web-dock-container">
+    <nav class="flock-dock" id="bottomNav">
+      <div class="active-indicator" id="activeIndicator"></div>
+      <a href="index.php" class="nav-item active" data-target="home">
+        <div class="icon-container">
+          <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+        </div>
+        <span class="nav-label">Home</span>
+      </a>
+      <a href="products.php" class="nav-item" data-target="shop">
+        <div class="icon-container">
+          <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path><path d="M12 11v4"></path><path d="M10 13h4"></path></svg>
+        </div>
+        <span class="nav-label">Shop</span>
+      </a>
+      <a href="cart.php" class="nav-item" data-target="cart">
+        <div class="icon-container">
+          <svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+        </div>
+        <span class="nav-label">Cart</span>
+      </a>
+      <a href="orders.php" class="nav-item" data-target="orders">
+        <div class="icon-container">
+          <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+        </div>
+        <span class="nav-label">Orders</span>
+      </a>
+      <a href="qr.php" class="nav-item" data-target="verify">
+        <div class="icon-container">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><rect x="7" y="7" width="3" height="3"></rect><rect x="14" y="7" width="3" height="3"></rect><rect x="7" y="14" width="3" height="3"></rect><rect x="14" y="14" width="3" height="3"></rect></svg>
+        </div>
+        <span class="nav-label">Verify QR</span>
+      </a>
+      <a href="calculator.php" class="nav-item" data-target="calculator">
+        <div class="icon-container">
+          <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>
+        </div>
+        <span class="nav-label">Dosage Calc</span>
+      </a>
+      <a href="settings.php" class="nav-item" data-target="settings">
+        <div class="icon-container">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09a1.65 1.65 0 0 0 1.51 1z"></path></svg>
+        </div>
+        <span class="nav-label">Settings</span>
+      </a>
+      <a href="auth/logout.php" class="nav-item logout" data-target="logout">
+        <div class="icon-container">
+          <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        </div>
+        <span class="nav-label">Logout</span>
+      </a>
+    </nav>
+  </div>
+
+  <script src="js/doodle.js"></script>
+  <script src="js/theme.js"></script>
+  <script>
+    async function loadProductOfTheWeek() {
+      var container = document.getElementById('product-of-week-content');
+      if (!container) return;
+      try {
+        var res = await fetch('api/top_product.php');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        var data = await res.json();
+        if (!data.ok || !data.product) throw new Error(data.message || 'No product');
+
+        var product = data.product;
+        var qty = (product.total_qty || 0).toLocaleString();
+        var html = '';
+        if (qty !== '0') {
+          html += '<span style="background: var(--ink); color: var(--paper-front); padding: 4px 12px; border-radius: 12px; font-size: 13px; font-weight: bold; text-transform: uppercase; transform: rotate(1deg); display: inline-block; margin-bottom: 10px;">Most Ordered (' + qty + ' this week)</span>';
+        } else {
+          html += '<span style="background: var(--ink); color: var(--paper-front); padding: 4px 12px; border-radius: 12px; font-size: 13px; font-weight: bold; text-transform: uppercase; transform: rotate(1deg); display: inline-block; margin-bottom: 10px;">Featured Product</span>';
+        }
+
+        html += '<div style="position: relative; width: 220px; height: 200px; display: flex; justify-content: center; align-items: center; margin: 0 auto; flex-shrink: 0;">';
+        html += '<div class="sunburst"></div>';
+        html += '<div class="product-sketch">';
+        if (product.logo_path) {
+          html += '<img src="' + escapeAttr(product.logo_path) + '" alt="" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\'">';
+          html += '<svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;opacity:0.9;padding:10px;box-sizing:border-box;"><path d="M12 2L2 22h20L12 2z"></path><circle cx="12" cy="14" r="3" fill="var(--paper-front)"></circle></svg>';
+        } else {
+          html += '<svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.9;padding:10px;box-sizing:border-box;"><path d="M12 2L2 22h20L12 2z"></path><circle cx="12" cy="14" r="3" fill="var(--paper-front)"></circle></svg>';
+        }
+        html += '<div style="position:absolute;left:0;right:0;bottom:0;background:linear-gradient(transparent,var(--ink));color:var(--paper-front);font-weight:900;font-size:12px;text-align:center;padding:6px 8px;opacity:0.9;">' + escapeHtml(product.name) + '</div>';
+        html += '</div></div>';
+
+        html += '<div style="flex-grow: 1; text-align: center; display: flex; flex-direction: column; align-items: center;">';
+        html += '<h3 class="card-title" style="font-size: 24px; margin-top: 15px; margin-bottom: 5px;">' + escapeHtml(product.name) + '</h3>';
+        html += '<p class="card-text" style="margin-bottom: 10px; max-width: 400px; font-size: 14px;">' + escapeHtml(product.description || 'Trusted poultry product.') + '</p>';
+
+        if (product.price) {
+          html += '<div class="price-tag">' + Number(product.price).toFixed(2) + '</div>';
+        }
+
+        html += '<div class="btn-group btn-group-center" style="margin-top: 15px; display: flex; justify-content: center; gap: 10px; width: 100%;">';
+        html += '<button class="doodle-btn btn-yellow add-to-cart-animated" data-product-id="' + product.id + '" data-product-name="' + escapeAttr(product.name) + '" data-price="' + product.price + '" data-size="' + escapeAttr(product.size || '') + '" style="max-width: 250px;">';
+        html += '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>';
+        html += 'Add to Cart</button>';
+        html += '</div></div>';
+
+        container.innerHTML = html;
+
+        document.querySelectorAll('.add-to-cart-animated').forEach(function(btn) {
+          btn.addEventListener('click', function(e) {
+            var pid = btn.getAttribute('data-product-id');
+            if (!pid) return;
+            var plusOne = document.createElement('div');
+            plusOne.className = 'plus-one';
+            plusOne.innerText = '+1';
+            var rect = btn.getBoundingClientRect();
+            plusOne.style.left = (e.clientX - rect.left) + 'px';
+            plusOne.style.top = (e.clientY - rect.top) + 'px';
+            btn.appendChild(plusOne);
+            btn.style.transform = 'scale(0.95) rotate(0deg)';
+            btn.style.boxShadow = '0px 0px 0px transparent';
+            setTimeout(function() {
+              btn.style.transform = 'rotate(-1deg)';
+              btn.style.boxShadow = '4px 4px 0px var(--ink)';
+            }, 150);
+            setTimeout(function() {
+              if (btn.contains(plusOne)) btn.removeChild(plusOne);
+            }, 800);
+
+            var form = new URLSearchParams();
+            form.set('action', 'add');
+            form.set('product_id', pid);
+            form.set('qty', '1');
+            var token = document.querySelector('meta[name="csrf-token"]')?.content || '';
+            fetch('api/cart.php', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'X-CSRF-Token': token },
+              body: form.toString()
+            }).then(function(r) { return r.json(); }).then(function(data) {
+              if (!data.ok) {
+                alert('Failed to add to cart: ' + (data.error || 'Unknown error'));
+              }
+            }).catch(function() {
+              alert('Failed to add to cart');
+            });
+          });
+        });
+      } catch (e) {
+        container.innerHTML = '<div class="product-of-week-error">Unable to load Product of the Week right now.</div>';
+      }
+    }
+
+    function escapeHtml(str) {
+      return String(str || '').replace(/[&<>"']/g, function(m) {
+        return ({ '&':'&amp;', '<':'<', '>':'>', '"':'"', "'":'&#039;' })[m];
+      });
+    }
+
+    function escapeAttr(str) {
+      return String(str || '').replace(/&/g, '&amp;').replace(/"/g, '"').replace(/'/g, '&#039;').replace(/</g, '<').replace(/>/g, '>');
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      loadProductOfTheWeek();
+    });
+  </script>
+  <script src="js/desktop-dock.js"></script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+- generic [active] [ref=f1e1]:
+  - main [ref=f1e2]:
+    - generic [ref=f1e3]:
+      - link "SafeFlock Solution Logo SafeFlock Solution SafeFlock Solution" [ref=f1e4] [cursor=pointer]:
+        - /url: index.php
+        - img "SafeFlock Solution Logo" [ref=f1e6]
+        - generic [ref=f1e7]:
+          - generic [ref=f1e8]: SafeFlock Solution
+          - generic [ref=f1e9]: SafeFlock Solution
+      - generic [ref=f1e12] [cursor=pointer]
+    - generic [ref=f1e22]:
+      - heading "Welcome to SafeFlock Solution" [level=1] [ref=f1e25]
+      - paragraph [ref=f1e26]: Your Trusted Poultry E-Commerce Platform with complete traceability and verified quality.
+      - generic [ref=f1e27]:
+        - link "Shop Now" [ref=f1e28] [cursor=pointer]:
+          - /url: products.php
+        - link "Verify Product" [ref=f1e33] [cursor=pointer]:
+          - /url: qr.php
+    - generic [ref=f1e37]:
+      - heading "Product of the Week" [level=2] [ref=f1e38]
+      - paragraph [ref=f1e39]: Dynamically updated based on this week's highest sales volume!
+      - generic [ref=f1e42]:
+        - generic [ref=f1e43]: Featured Product
+        - generic [ref=f1e44]: Amprolium
+        - generic [ref=f1e50]:
+          - heading "Amprolium" [level=3] [ref=f1e51]
+          - paragraph [ref=f1e52]: Coccidiostat Amprolium (demo)
+          - generic [ref=f1e53]: "600.00"
+          - button "Add to Cart" [ref=f1e55] [cursor=pointer]
+    - heading "Why Choose SafeFlock Solution?" [level=2] [ref=f1e60]
+    - paragraph [ref=f1e61]: Quality poultry products with complete traceability
+    - generic [ref=f1e62]:
+      - generic [ref=f1e63]:
+        - heading "Verified Quality" [level=3] [ref=f1e68]
+        - paragraph [ref=f1e69]: All products are verified with QR codes for complete transparency and safety.
+      - generic [ref=f1e70]:
+        - heading "Fast Delivery" [level=3] [ref=f1e74]
+        - paragraph [ref=f1e75]: Our dedicated logistics network ensures your flock gets what they need, on time.
+      - generic [ref=f1e76]:
+        - heading "Health Tracking" [level=3] [ref=f1e80]
+        - paragraph [ref=f1e81]: Monitor dosages, inventory, and flock health via our integrated IoT platform.
+  - navigation [ref=f1e82]:
+    - link "Home" [ref=f1e84] [cursor=pointer]:
+      - /url: index.php
+    - link "Shop" [ref=f1e90] [cursor=pointer]:
+      - /url: products.php
+    - link "Cart" [ref=f1e96] [cursor=pointer]:
+      - /url: cart.php
+    - link "Orders" [ref=f1e103] [cursor=pointer]:
+      - /url: orders.php
+    - link "Verify QR" [ref=f1e109] [cursor=pointer]:
+      - /url: qr.php
+    - link "Dosage Calc" [ref=f1e118] [cursor=pointer]:
+      - /url: calculator.php
+    - link "Settings" [ref=f1e124] [cursor=pointer]:
+      - /url: settings.php
+    - link "Logout" [ref=f1e130] [cursor=pointer]:
+      - /url: auth/logout.php

@@ -1,0 +1,10 @@
+User-agent: *
+Disallow: /index.php
+Disallow: /login.php
+Disallow: /auth/
+Disallow: /api/
+Disallow: /db/
+Disallow: /partials/
+Disallow: /check_
+Disallow: /debug_
+Sitemap: https://safeflocksolutions.freedev.app/sitemap.xml

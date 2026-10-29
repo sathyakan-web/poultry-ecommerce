@@ -1,0 +1,205 @@
+f<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Safe Flock Solutions - IoT Cold Chain Monitor</title>
+    
+    <!-- Whimsical Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700;900&family=Gochi+Hand&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --ink: #2b2b2b;
+            --paper-front: #ffffff;
+            --paper-back: #f8f9fa;
+            --bg-body: #e9ecef;
+            --primary-btn: #ffe66d;
+            --secondary-btn: #4ecdc4;
+            --action-btn: #ff6b6b;
+            --success: #06d6a0;
+            --cold-blue: #a2d2ff;
+            --warning: #ff9f1c;
+            --border-width: 3px;
+            --shadow-offset: 6px;
+            --sketch-r1: 8px 24px 8px 24px / 24px 8px 24px 8px;
+            --sketch-r2: 24px 8px 24px 8px / 8px 24px 8px 24px;
+            --sketch-btn: 12px 18px 12px 18px / 18px 12px 18px 12px;
+            --dock-radius: 40px 50px 45px 55px / 55px 45px 50px 40px;
+            --font-ui: 'Comic Neue', 'Comic Sans MS', sans-serif;
+            --font-display: 'Gochi Hand', 'Marker Felt', cursive;
+        }
+        body.dark-mode {
+            --ink: #f0f0f0;
+            --paper-front: #1a1a2e;
+            --paper-back: #16213e;
+            --bg-body: #0d0d1a;
+            --cold-blue: #0077b6;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; transition: background-color 0.3s, color 0.3s; }
+        body {
+            font-family: var(--font-ui);
+            background-color: var(--bg-body);
+            color: var(--ink);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            padding-bottom: 120px;
+            background-image: linear-gradient(rgba(0,0,0,0.05) 2px, transparent 2px), linear-gradient(90deg, rgba(0,0,0,0.05) 2px, transparent 2px);
+            background-size: 30px 30px;
+        }
+        body.dark-mode {
+            background-image: linear-gradient(rgba(255,255,255,0.05) 2px, transparent 2px), linear-gradient(90deg, rgba(255,255,255,0.05) 2px, transparent 2px);
+        }
+        .top-header { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; background-color: var(--paper-front); border-bottom: 2px dashed var(--ink); position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .brand-wrapper { display: flex; align-items: center; gap: 15px; text-decoration: none; }
+        .logo-box { width: 50px; height: 50px; background-color: var(--paper-front); border: 2.5px solid var(--ink); border-radius: 12px; display: flex; justify-content: center; align-items: center; transform: rotate(-3deg); box-shadow: 2px 2px 0px var(--ink); font-size: 24px; }
+        .brand-text-stack { display: flex; flex-direction: column; }
+        .brand-title-main { font-family: var(--font-display); font-size: 28px; font-weight: bold; color: var(--ink); line-height: 1; }
+        .brand-title-sub { font-size: 11px; font-weight: 900; color: var(--action-btn); text-transform: uppercase; letter-spacing: 2px; }
+        .dashboard-container { width: 100%; max-width: 1200px; padding: 30px 20px; display: flex; flex-direction: column; gap: 20px; }
+        .control-panel { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 20px; background: var(--paper-front); padding: 20px 25px; border: var(--border-width) solid var(--ink); border-radius: var(--sketch-r1); box-shadow: 6px 6px 0px var(--ink); margin-bottom: 10px; }
+        .control-info h1 { font-family: var(--font-display); font-size: 32px; margin-bottom: 5px; }
+        .control-info p { font-size: 16px; font-weight: bold; color: #666; }
+        .control-actions { display: flex; align-items: center; gap: 15px; }
+        .doodle-btn { font-family: var(--font-ui); font-size: 16px; font-weight: 900; padding: 10px 20px; border: var(--border-width) solid var(--ink); border-radius: var(--sketch-btn); cursor: pointer; transition: all 0.15s ease; display: inline-flex; align-items: center; gap: 8px; box-shadow: 3px 3px 0px var(--ink); color: var(--ink); background: var(--paper-front); }
+        .doodle-btn:active { transform: translate(3px, 3px); box-shadow: 0px 0px 0px transparent; }
+        .doodle-btn:hover { background: var(--primary-btn); }
+        .toggle-wrapper { display: flex; align-items: center; gap: 10px; font-weight: bold; cursor: pointer; }
+        .doodle-toggle { width: 50px; height: 28px; background: var(--success); border: 2.5px solid var(--ink); border-radius: 20px; position: relative; box-shadow: inset 2px 2px 5px rgba(0,0,0,0.2); transition: background 0.3s; }
+        .doodle-toggle::after { content: ''; position: absolute; top: 2px; left: 3px; width: 18px; height: 18px; background: var(--paper-front); border: 2.5px solid var(--ink); border-radius: 50%; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .toggle-wrapper input:not(:checked) + .doodle-toggle { background: var(--disabled); }
+        .toggle-wrapper input:not(:checked) + .doodle-toggle::after { transform: translateX(20px); }
+        .sensor-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 25px; }
+        .sensor-card { background: var(--paper-front); border: var(--border-width) solid var(--ink); border-radius: var(--sketch-r2); padding: 20px; box-shadow: var(--shadow-offset) var(--shadow-offset) 0px var(--ink); position: relative; display: flex; flex-direction: column; gap: 15px; transition: transform 0.3s ease, box-shadow 0.3s ease; overflow: hidden; }
+        .sensor-card:nth-child(odd) { border-radius: var(--sketch-r1); transform: rotate(-0.5deg); }
+        .sensor-card:nth-child(even) { transform: rotate(0.5deg); }
+        .sensor-card:hover { transform: translateY(-4px) rotate(0deg); box-shadow: 8px 8px 0px var(--ink); }
+        .washi-tape { position: absolute; top: -10px; left: 50%; transform: translateX(-50%) rotate(-2deg); width: 80px; height: 25px; background: rgba(78, 205, 196, 0.4); border: 1px dashed rgba(0,0,0,0.3); z-index: 10; }
+        .sensor-card:nth-child(even) .washi-tape { background: rgba(255, 183, 3, 0.4); transform: translateX(-50%) rotate(3deg); }
+        .card-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px dashed rgba(0,0,0,0.15); padding-bottom: 10px; margin-top: 5px; }
+        .sensor-name { font-family: var(--font-display); font-size: 24px; font-weight: bold; }
+        .status-badge { font-size: 14px; font-weight: 900; padding: 4px 12px; border-radius: 12px; border: 2px solid var(--ink); text-transform: uppercase; transform: rotate(2deg); }
+        .status-ok { background: var(--success); color: var(--ink); }
+        .status-warn { background: var(--warning); color: var(--ink); }
+        .status-crit { background: var(--action-btn); color: var(--paper-front); animation: pulse 1s infinite alternate; }
+        .telemetry-data { display: flex; align-items: center; justify-content: space-between; margin: 10px 0; }
+        .temp-reading { font-family: var(--font-display); font-size: 48px; font-weight: bold; line-height: 1; display: flex; align-items: flex-start; }
+        .temp-reading span { font-size: 24px; margin-top: 5px; margin-left: 2px; }
+        .thermo-doodle { width: 40px; height: 80px; overflow: visible; }
+        .thermo-glass { fill: rgba(255,255,255,0.5); stroke: var(--ink); stroke-width: 3; stroke-linecap: round; }
+        .thermo-mercury { fill: var(--cold-blue); transition: height 0.5s ease, y 0.5s ease, fill 0.5s ease; }
+        .thermo-bulb { fill: var(--cold-blue); stroke: var(--ink); stroke-width: 3; transition: fill 0.5s ease; }
+        .sensor-meta { font-size: 13px; font-weight: bold; color: #666; display: flex; flex-direction: column; gap: 4px; }
+        .sensor-card.critical { border-color: var(--action-btn); background-color: #fff5f5; animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) 3; box-shadow: 6px 6px 0px var(--action-btn); }
+        body.dark-mode .sensor-card.critical { background-color: #3b1a1a; }
+        .sensor-card.critical .thermo-mercury, .sensor-card.critical .thermo-bulb { fill: var(--action-btn); }
+        .sensor-card.critical .temp-reading { color: var(--action-btn); }
+        @keyframes shake { 10%, 90% { transform: translate3d(-2px, 0, 0) rotate(-1deg); } 20%, 80% { transform: translate3d(2px, 0, 0) rotate(1deg); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0) rotate(-2deg); } 40%, 60% { transform: translate3d(4px, 0, 0) rotate(2deg); } }
+        @keyframes pulse { 0% { transform: scale(1) rotate(2deg); } 100% { transform: scale(1.1) rotate(0deg); box-shadow: 0 0 10px var(--action-btn); } }
+        .trigger-btn { font-size: 12px; padding: 4px 10px; background: #b8860b; color: #fff; border-color: #8b0000; box-shadow: 2px 2px 0px #8b0000; position: absolute; bottom: 8px; right: 10px; }
+        .toast-msg.show { transform: translateX(-50%) translateY(0) rotate(-1deg); }
+    </style>
+</head>
+<body>
+    <div id="toast" class="toast-msg"><span id="toastIcon">🚨</span> <span id="toastText">SMS ALERT SENT!</span></div>
+    <main class="dashboard-container">
+        <div class="control-panel">
+            <div class="control-info">
+                <h1>IoT Cold Chain Monitor</h1>
+                <p>Live thermal telemetry from vaccine bays & transit vans.</p>
+            </div>
+            <div class="control-actions">
+                <button class="doodle-btn" onclick="forceRefresh()">Refresh Now</button>
+            </div>
+        </div>
+        <div class="sensor-grid" id="sensorGrid"></div>
+    </main>
+    <script>
+        const CRITICAL_HIGH = 10.0;
+        const CRITICAL_LOW = 0.0;
+        let simInterval = null;
+        let alertTriggeredFor = new Set();
+        let sensors = [];
+        function manualSMSAlert(sensorName, temp) {
+            const msg = `Vaccine (${sensorName}) is getting hot`;
+            const toast = document.getElementById('toast');
+            document.getElementById('toastText').innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 4000);
+            fetch('api/iot_provider_alert.php', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'location=' + encodeURIComponent(sensorName) + '&temperature=' + encodeURIComponent(temp)
+            }).catch(() => {});
+        }
+        function getThermoSVG(temp, status) {
+            let fillPercent = (temp / 15) * 100;
+            if (fillPercent > 100) fillPercent = 100;
+            if (fillPercent < 0) fillPercent = 0;
+            const fillHeight = (fillPercent / 100) * 40;
+            const fillY = 50 - fillHeight;
+            return `<svg class="thermo-doodle" viewBox="0 0 40 80"><rect x="15" y="10" width="10" height="45" rx="5" class="thermo-glass" /><circle cx="20" cy="60" r="10" class="thermo-glass" /><rect x="17" y="${fillY}" width="6" height="${fillHeight}" fill="var(--cold-blue)" /><circle cx="20" cy="60" r="7" class="thermo-bulb" /></svg>`;
+        }
+        function renderGrid() {
+            const grid = document.getElementById('sensorGrid');
+            grid.innerHTML = '';
+            const now = new Date();
+            const timeString = now.toISOString().replace('T', ' ').substring(0, 19);
+            sensors.forEach((s) => {
+                let status = 'OK';
+                let badgeClass = 'status-ok';
+                let cardClass = 'sensor-card';
+                if (s.temp >= CRITICAL_HIGH || s.temp <= CRITICAL_LOW) {
+                    status = 'CRITICAL';
+                    badgeClass = 'status-crit';
+                    cardClass += ' critical';
+                } else if (s.temp >= 8.0 || s.temp <= 3.0) {
+                    status = 'WARNING';
+                    badgeClass = 'status-warn';
+                }
+                const t = (s.temp == null) ? '--' : s.temp.toFixed(1);
+                const html = `<div class="${cardClass}" id="card-${s.id}"><div class="washi-tape"></div><div class="card-header"><span class="sensor-name">${s.name}</span><span class="status-badge ${badgeClass}">${status}</span></div><div class="telemetry-data"><div class="temp-reading">${t}<span>°C</span></div>${getThermoSVG(s.temp, status)}</div><div class="sensor-meta"><span>${timeString}</span><span>Product ID: ${s.productId}</span></div><button class="doodle-btn trigger-btn" onclick="forceCritical(${s.id}); manualSMSAlert('${s.name}', 10.5)">Alert</button></div>`;
+                grid.innerHTML += html;
+            });
+        }
+        function simulateData() {
+            sensors.forEach(s => {
+                // Auto-refresh must never raise temperatures or drop below 0
+                const fluctuation = -(Math.random() * 0.5);
+                s.temp += fluctuation;
+                if (s.temp > 10) s.temp = 10;
+                if (s.temp < 0) s.temp = 0;
+            });
+            renderGrid();
+        }
+        function forceCritical(id) {
+            const s = sensors.find(x => x.id === id);
+            if(!s) return;
+            if (s.temp >= 10 || s.temp <= 0) {
+                s.temp = 5.0;
+                alertTriggeredFor.delete(s.id);
+                renderGrid();
+                return;
+            }
+            s.temp = 10.5;
+            if (!alertTriggeredFor.has(s.id)) {
+                alertTriggeredFor.add(s.id);
+                manualSMSAlert(s.name, s.temp);
+            }
+            renderGrid();
+        }
+        function forceRefresh() { simulateData(); }
+        async function loadSensors() {
+            const res = await fetch('api/iot_vaccines.php');
+            const data = await res.json();
+            sensors = data.vaccines || [];
+            renderGrid();
+        }
+        loadSensors();
+    </script>
+</body>
+</html>

@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Safe Flock - Mobile Inventory V2</title>
+    
+    <!-- Whimsical Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700;900&family=Gochi+Hand&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- STREAMING_CHUNK: Core Design & Variables --- */
+        :root {
+            --ink: #2b2b2b;
+            --paper: #ffffff;
+            --paper-tint: #fdfbf7;
+            --bg-desk: #d1d5db;
+            
+            --yellow: #ffe66d;
+            --yellow-hover: #ffd166;
+            --teal: #4ecdc4;
+            --coral: #ff6b6b;
+            --green: #06d6a0;
+            
+            --border-thick: 3px solid var(--ink);
+            --shadow-doodle: 4px 4px 0px var(--ink);
+            --shadow-sm: 2px 2px 0px var(--ink);
+            
+            --radius-sketch: 8px 24px 8px 24px / 24px 8px 24px 8px;
+            --radius-sketch-alt: 24px 8px 24px 8px / 8px 24px 8px 24px;
+            --radius-pill: 50px;
+            
+            --font-ui: 'Comic Neue', 'Comic Sans MS', sans-serif;
+            --font-display: 'Gochi Hand', 'Marker Felt', cursive;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: var(--font-ui); background-color: var(--bg-desk); color: var(--ink);
+            display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden;
+        }
+
+        /* Mobile Device Frame */
+        .mobile-frame {
+            width: 100%; max-width: 414px; height: 100vh; max-height: 896px;
+            background-color: var(--paper-tint); position: relative;
+            display: flex; flex-direction: column; overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            /* Ruled Paper Background */
+            background-image: repeating-linear-gradient(transparent, transparent 31px, rgba(0,0,0,0.06) 31px, rgba(0,0,0,0.06) 33px);
+            background-position: 0 45px;
+        }
+
+        @media (min-height: 896px) {
+            .mobile-frame { border-radius: 40px; border: 8px solid var(--ink); height: 896px; }
+        }
+
+        /* --- STREAMING_CHUNK: App Header & Filter Chips --- */
+        .app-header {
+            padding: 20px 15px 10px 15px; background: rgba(253, 251, 247, 0.95);
+            backdrop-filter: blur(5px); z-index: 20; border-bottom: 2px dashed rgba(0,0,0,0.1);
+        }
+
+        .brand-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .brand-title { font-family: var(--font-display); font-size: 30px; font-weight: bold; transform: rotate(-1deg); display: flex; align-items: center; gap: 8px; line-height: 1; }
+        
+        .total-badge {
+            background: var(--ink); color: var(--paper); font-weight: 900; font-size: 14px;
+            padding: 4px 12px; border-radius: 12px; transform: rotate(2deg); box-shadow: var(--shadow-sm);
+        }
+
+        /* Horizontal Scroll Chips */
+        .chip-scroll { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
+        .chip-scroll::-webkit-scrollbar { display: none; }
+        .chip {
+            white-space: nowrap; padding: 6px 16px; font-weight: bold; font-size: 15px;
+            border: 2px solid var(--ink); border-radius: 20px; background: var(--paper);
+            color: var(--ink); cursor: pointer; transition: all 0.2s; box-shadow: 2px 2px 0px rgba(0,0,0,0.1);
+        }
+        .chip.active { background: var(--teal); box-shadow: var(--shadow-sm); transform: translateY(-2px) rotate(-1deg); }
+
+        /* --- STREAMING_CHUNK: Accordion Inventory List --- */
+        .inventory-list {
+            flex-grow: 1; overflow-y: auto; padding: 15px; padding-bottom: 140px; /* Space for FAB + Dock */
+            display: flex; flex-direction: column; gap: 15px; scrollbar-width: none;
+        }
+        .inventory-list::-webkit-scrollbar { display: none; }
+
+        .inv-card {
+            background: var(--paper); border: var(--border-thick); border-radius: var(--radius-sketch);
+            box-shadow: 3px 3px 0px rgba(0,0,0,0.1); transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow: hidden; /* Important for accordion */
+        }
+        .inv-card:nth-child(even) { border-radius: var(--radius-sketch-alt); }
+        .inv-card.open { box-shadow: var(--shadow-doodle); transform: translateY(-2px); border-color: var(--teal); background: #f0fbfa; }
+        .inv-card.low-stock { border-color: var(--coral); background: #fff5f5; }
+
+        /* Front Summary (Always visible) */
+        .card-summary {
+            padding: 15px; display: flex; align-items: center; gap: 12px; cursor: pointer; position: relative;
+        }
+        .thumb-box {
+            width: 60px; height: 60px; border: 2px solid var(--ink); border-radius: 12px;
+            background: #eee; flex-shrink: 0; transform: rotate(-2deg); overflow: hidden;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .thumb-box img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .info-col { flex-grow: 1; }
+        .item-name { font-family: var(--font-display); font-size: 20px; line-height: 1.1; margin-bottom: 2px; }
+        .item-meta { font-size: 12px; font-weight: bold; color: #666; display: flex; gap: 5px; align-items: center;}
+        
+        .qty-circle {
+            width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--ink);
+            display: flex; justify-content: center; align-items: center; font-family: var(--font-display);
+            font-size: 22px; font-weight: bold; background: var(--green); color: var(--ink); box-shadow: 2px 2px 0px rgba(0,0,0,0.15);
+        }
+        .low-stock .qty-circle { background: var(--coral); color: white; animation: pulse-danger 2s infinite; }
+
+        @keyframes pulse-danger { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1) rotate(5deg); } }
+
+        /* Unfolding Editor Section */
+        .card-editor {
+            display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .inv-card.open .card-editor { grid-template-rows: 1fr; }
+        .editor-inner { overflow: hidden; padding: 0 15px; }
+        .editor-content { padding-top: 10px; padding-bottom: 15px; border-top: 2px dashed rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 15px; }
+
+        /* Segmented Controls for Math Operation */
+        .math-segments { display: flex; background: rgba(0,0,0,0.05); border-radius: 12px; padding: 4px; border: 2px solid var(--ink); }
+        .segment-btn { flex: 1; text-align: center; padding: 8px; font-weight: 900; font-size: 14px; color: #666; cursor: pointer; border-radius: 8px; transition: 0.2s;}
+        .segment-btn.active.add { background: var(--green); color: var(--ink); box-shadow: var(--shadow-sm); transform: scale(1.05);}
+        .segment-btn.active.sub { background: var(--coral); color: white; box-shadow: var(--shadow-sm); transform: scale(1.05);}
+        .segment-btn.active.set { background: var(--yellow); color: var(--ink); box-shadow: var(--shadow-sm); transform: scale(1.05);}
+
+        /* Massive Input Field */
+        .giant-input-wrapper { display: flex; align-items: center; justify-content: center; gap: 15px; }
+        .giant-input-wrapper button { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--ink); background: var(--paper); font-size: 24px; font-weight: bold; box-shadow: 2px 2px 0px var(--ink); cursor: pointer;}
+        .giant-input-wrapper button:active { transform: translate(2px, 2px); box-shadow: none; }
+        .giant-input {
+            width: 100px; text-align: center; font-family: var(--font-display); font-size: 42px; border: none; background: transparent; color: var(--ink); outline: none; border-bottom: 3px solid var(--ink); border-radius: 0; padding: 0;
+        }
+
+        .update-btn {
+            width: 100%; padding: 12px; background: var(--ink); color: var(--paper); font-family: var(--font-ui); font-size: 16px; font-weight: 900;
+            border: none; border-radius: 12px; box-shadow: var(--shadow-sm); cursor: pointer; transition: 0.15s; display: flex; justify-content: center; align-items: center; gap: 8px;
+        }
+        .update-btn:active { transform: translate(2px, 2px); box-shadow: 0 0 0 transparent; }
+
+        /* --- STREAMING_CHUNK: FAB & Add Product Slide-down --- */
+        .fab-container { position: absolute; bottom: 95px; left: 0; right: 0; display: flex; justify-content: center; z-index: 40; pointer-events: none; }
+        .fab-pill {
+            pointer-events: auto; background: var(--yellow); border: var(--border-thick); border-radius: var(--radius-pill);
+            padding: 12px 24px; display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-size: 20px; font-weight: bold;
+            box-shadow: var(--shadow-doodle); cursor: pointer; transition: 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); color: var(--ink); transform: rotate(-1deg);
+        }
+        .fab-pill:active { transform: translate(4px, 4px) rotate(0deg); box-shadow: 0 0 0 transparent; }
+
+        /* Full Screen Slide Down Modal */
+        .add-modal {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 100;
+            display: flex; flex-direction: column; justify-content: flex-end; opacity: 0; pointer-events: none; transition: opacity 0.3s;
+        }
+        .add-modal.open { opacity: 1; pointer-events: auto; }
+        
+        .add-sheet {
+            background: var(--paper); height: 90%; border-top: 4px solid var(--ink); border-radius: 35px 35px 0 0;
+            padding: 25px 20px; display: flex; flex-direction: column; gap: 15px; transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); overflow-y: auto; scrollbar-width: none;
+            /* Clipboard clip aesthetic */
+            position: relative;
+        }
+        .add-modal.open .add-sheet { transform: translateY(0); }
+        .clip-art { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 80px; height: 30px; background: #999; border: 2px solid var(--ink); border-radius: 10px; box-shadow: inset 0 -5px 0 rgba(0,0,0,0.2); }
+
+        .sheet-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; margin-top: 10px; }
+        .sheet-title { font-family: var(--font-display); font-size: 28px; }
+        .close-btn { width: 35px; height: 35px; border: 2px solid var(--ink); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 20px; background: #eee; cursor: pointer; box-shadow: 2px 2px 0px var(--ink);}
+
+        /* Forms */
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        .form-label { font-size: 14px; font-weight: 900; color: var(--ink); }
+        .doodle-input {
+            width: 100%; padding: 14px; font-family: var(--font-ui); font-size: 16px; font-weight: bold;
+            color: var(--ink); background-color: var(--paper-tint); border: 2.5px solid var(--ink);
+            border-radius: 12px; box-shadow: inset 2px 2px 5px rgba(0,0,0,0.05); outline: none; transition: 0.2s;
+        }
+        .doodle-input:focus { border-color: var(--teal); box-shadow: 3px 3px 0px var(--teal); background: var(--paper); transform: translateY(-2px);}
+
+        /* Image Upload UI */
+        .upload-box {
+            border: 2.5px dashed var(--ink); border-radius: 15px; padding: 20px; text-align: center;
+            background: rgba(0,0,0,0.02); cursor: pointer; transition: 0.2s; position: relative; overflow: hidden;
+        }
+        .upload-box:active { background: var(--yellow); border-style: solid; }
+        #previewContainer { position: absolute; inset: 0; background: var(--paper); display: none; }
+        #previewImg { width: 100%; height: 100%; object-fit: cover; }
+        .remove-img { position: absolute; top: 10px; right: 10px; background: var(--coral); color: white; border: 2px solid var(--ink); border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-weight: bold; box-shadow: 2px 2px 0px var(--ink); cursor: pointer;}
+
+        /* --- STREAMING_CHUNK: Toast & Dock --- */
+        .toast-msg {
+            position: absolute; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px);
+            background-color: var(--ink); color: var(--paper); padding: 12px 20px;
+            border-radius: 15px; font-family: var(--font-ui); font-size: 16px; font-weight: bold; white-space: nowrap;
+            z-index: 1000; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 4px 4px 0px var(--teal); display: flex; align-items: center; gap: 8px; border: 2px solid white;
+        }
+        .toast-msg.show { transform: translateX(-50%) translateY(0) rotate(1deg); }
+
+        .dock-wrapper { position: absolute; bottom: 15px; left: 15px; right: 15px; z-index: 30; }
+        .flock-dock {
+            background-color: var(--paper); border: var(--border-thick); border-radius: var(--radius-pill); box-shadow: 5px 5px 0px var(--ink);
+            display: flex; justify-content: space-between; align-items: center; padding: 8px 5px; position: relative; height: 70px;
+        }
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--ink); position: relative; cursor: pointer; width: 20%; height: 100%; z-index: 2;
+        }
+        .nav-item svg { width: 24px; height: 24px; fill: none; stroke: var(--ink); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; transition: all 0.3s; }
+        .nav-label { font-size: 10px; font-weight: 900; letter-spacing: 0.5px; transition: all 0.3s ease; }
+        
+        .dock-indicator {
+            position: absolute; width: calc(100% / 5); height: 58px; background-color: var(--yellow); border: 2px dashed var(--ink);
+            border-radius: 35px 40px 35px 40px / 40px 35px 40px 35px; box-shadow: 2px 2px 0px var(--ink); top: 3px; left: 0; z-index: 1; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .nav-item.active svg { transform: scale(1.15) rotate(-5deg); filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.2)); }
+    </style>
+</head>
+<body>
+
+    <div class="mobile-frame">
+        
+        <!-- Toast Notification -->
+        <div id="toast" class="toast-msg"><span id="toastIcon">✨</span> <span id="toastText">Action triggered!</span></div>
+
+        <!-- --- STREAMING_CHUNK: Header & Filters --- -->
+        <header class="app-header">
+            <div class="brand-row">
+                <div class="brand-title">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                    My Flock
+                </div>
+                <div class="total-badge" id="totalItemsBadge">0 Items</div>
+            </div>
+            
+            <div class="chip-scroll" id="filterContainer">
+                <div class="chip active" onclick="setFilter('all', this)">All Stock</div>
+                <div class="chip" onclick="setFilter('vaccines', this)">Vaccines 💉</div>
+                <div class="chip" onclick="setFilter('layer_meds', this)">Layer Meds 💊</div>
+                <div class="chip" onclick="setFilter('feed_meds', this)">Feed Meds 🪣</div>
+                <div class="chip" onclick="setFilter('water', this)">Water 💧</div>
+            </div>
+        </header>
+
+        <!-- --- STREAMING_CHUNK: Accordion List --- -->
+        <main class="inventory-list" id="inventoryList">
+            <!-- Populated by JS -->
+        </main>
+
+        <!-- --- STREAMING_CHUNK: Floating Action Button --- -->
+        <div class="fab-container">
+            <div class="fab-pill" onclick="toggleAddModal(true)">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                New Product
+            </div>
+        </div>
+
+        <!-- --- STREAMING_CHUNK: Add Product Full Modal --- -->
+        <div class="add-modal" id="addModal">
+            <div class="add-sheet">
+                <div class="clip-art"></div>
+                
+                <div class="sheet-header">
+                    <h2 class="sheet-title">Create Item</h2>
+                    <div class="close-btn" onclick="toggleAddModal(false)">×</div>
+                </div>
+
+                <!-- Image Upload -->
+                <div class="form-group">
+                    <input type="file" id="newImage" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+                    <div class="upload-box" onclick="document.getElementById('newImage').click()">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="margin: 0 auto 5px auto;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                        <div style="font-weight: 900;">Tap to snap a photo or upload</div>
+                        
+                        <div id="previewContainer">
+                            <img id="previewImg" src="">
+                            <div class="remove-img" onclick="removeImage(event)">×</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Product Name</label>
+                    <input type="text" id="newName" class="doodle-input" placeholder="e.g., Avian Flu Vax">
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">Category</label>
+                        <select id="newCat" class="doodle-input" style="appearance: none;">
+                            <option value="vaccines">Vaccines</option>
+                            <option value="meds">Medicines</option>
+                            <option value="supplies">Supplies</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">Size / Pack</label>
+                        <input type="text" id="newSize" class="doodle-input" placeholder="e.g., 500ml">
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 10px; align-items: flex-end;">
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">Price (₹)</label>
+                        <input type="number" id="newPrice" class="doodle-input" placeholder="0.00">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">Start Qty</label>
+                        <input type="number" id="newQty" class="doodle-input" value="50" style="text-align: center; font-size: 22px;">
+                    </div>
+                </div>
+
+                <button class="update-btn" style="background: var(--green); color: var(--ink); margin-top: 10px; font-size: 20px; padding: 15px;" onclick="submitNewProduct()">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    Register to Inventory
+                </button>
+            </div>
+        </div>
+
+        <!-- --- STREAMING_CHUNK: Dock Navigation --- -->
+        <div class="dock-wrapper">
+            <nav class="flock-dock" id="bottomNav">
+                <div class="dock-indicator" id="dockIndicator"></div>
+
+                <a class="nav-item"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></a>
+                <a class="nav-item"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><rect x="7" y="7" width="3" height="3"></rect><rect x="14" y="7" width="3" height="3"></rect><rect x="7" y="14" width="3" height="3"></rect><rect x="14" y="14" width="3" height="3"></rect></svg></a>
+                <a class="nav-item"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg></a>
+                <a class="nav-item"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg></a>
+                <a class="nav-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l-.06-.06a1.65 1.65 0 0 0-.33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09a1.65 1.65 0 0 0 1.51 1z"></path></svg></a>
+            </nav>
+        </div>
+    </div>
+
+    <!-- --- STREAMING_CHUNK: Application Logic & Background Services --- -->
+    <script>
+        // 1. Data Store
+        let inventoryData = [
+            { id: '1', cat: 'vaccines', name: 'Avian Influenza (H5)', size: '5ml vial (liquid)', price: '600.00', qty: 97, img: 'uploads/VCX-H5-005.jpg' },
+            { id: '2', cat: 'vaccines', name: 'Gumboro Vaccine', size: '2ml vial (liquid)', price: '180.00', qty: 60, img: 'uploads/VCX-GUMB-001.jpg' },
+            { id: '3', cat: 'vaccines', name: 'IBD Vaccine (Intermediate)', size: '1000 dose vial (spore)', price: '350.00', qty: 39, img: 'uploads/VCX-IBD-002.jpg' },
+            { id: '4', cat: 'vaccines', name: 'ND Vaccine (LaSota)', size: '1000 dose vial (spore)', price: '280.00', qty: 89, img: 'uploads/VCX-ND-003.jpg' },
+            { id: '5', cat: 'vaccines', name: 'Newcastle Vaccine', size: '5ml vial (liquid)', price: '450.00', qty: 999999, img: 'uploads/VCX-NEW-001.jpg' },
+            { id: '6', cat: 'vaccines', name: 'Reovirus Vaccine', size: '1000 dose vial (spore)', price: '500.00', qty: 55, img: 'uploads/VCX-REV-004.jpg' },
+            { id: '83', cat: 'vaccines', name: 'raniket', size: '', price: '0.00', qty: 5000, img: '' },
+            { id: '139', cat: 'layer_meds', name: 'Amprolium', size: '500g', price: '600.00', qty: 34, img: 'uploads/MED-AMPROLIUM-001.jpg' },
+            { id: '142', cat: 'layer_meds', name: 'Bacitracin Methylene Disalicylate (BMD)', size: '500g', price: '950.00', qty: 196, img: 'uploads/MED-BMD-001.jpg' },
+            { id: '143', cat: 'layer_meds', name: 'Chlortetracycline (CTC)', size: '500g', price: '1100.00', qty: 200, img: 'uploads/MED-CTC-001.jpg' },
+            { id: '140', cat: 'layer_meds', name: 'Fenbendazole', size: '500g', price: '1200.00', qty: 599, img: 'uploads/MED-FENBENDAZOLE-001.jpg' },
+            { id: '141', cat: 'layer_meds', name: 'Hygromycin B', size: '500ml', price: '1800.00', qty: 100, img: 'uploads/MED-HYGROMYCINB-0014.jpg' },
+            { id: '8', cat: 'layer_meds', name: 'Levo-Tyl 10% (Oral)', size: '500ml', price: '750.00', qty: 139, img: 'uploads/MED-LEV-002.jpg' },
+            { id: '7', cat: 'layer_meds', name: 'Oxy-Tyl 200 (Oral)', size: '500ml', price: '850.00', qty: 200, img: 'uploads/MED-OXY-001.jpg' },
+            { id: '89', cat: 'feed_meds', name: 'Calcium Supplement', size: '500g', price: '280.00', qty: 50, img: 'uploads/FEED-CALCIUM-001.jpg' },
+            { id: '9', cat: 'feed_meds', name: 'Chlorine Tabs', size: '500g', price: '350.00', qty: 500, img: 'uploads/WTR-CHL-TAB-001.jpg' },
+            { id: '88', cat: 'feed_meds', name: 'Electrolyte Powder', size: '500g', price: '250.00', qty: 50, img: 'uploads/FEED-ELECTRO-001.jpg' },
+            { id: '90', cat: 'feed_meds', name: 'Liver Tonic', size: '500ml', price: '350.00', qty: 50, img: 'uploads/FEED-LIVER-001.jpg' },
+            { id: '171', cat: 'feed_meds', name: 'oxytetracycline', size: '', price: '0.00', qty: 20, img: '' },
+            { id: '91', cat: 'feed_meds', name: 'Probiotic Powder', size: '500g', price: '450.00', qty: 510, img: 'uploads/FEED-PROBIOTIC-001.jpg' },
+            { id: '10', cat: 'feed_meds', name: 'Taximbinder', size: '500g', price: '450.00', qty: 320, img: 'uploads/FMD-TAX-001.jpg' },
+            { id: '85', cat: 'feed_meds', name: 'Vitamin AD3E', size: '500g', price: '400.00', qty: 500, img: 'uploads/FEED-AD3E-001.jpg' },
+            { id: '86', cat: 'feed_meds', name: 'Vitamin B-Complex', size: '500g', price: '350.00', qty: 500, img: 'uploads/FEED-B-COMP-001.jpg' },
+            { id: '87', cat: 'feed_meds', name: 'Vitamin C Supplement', size: '500g', price: '300.00', qty: 499, img: 'uploads/FEED-C-SUP-001.jpg' },
+            { id: '12', cat: 'water', name: 'Bleaching Powder', size: '500g', price: '150.00', qty: 999998, img: 'uploads/WTR-BLEACH-001.jpg' },
+            { id: '17', cat: 'water', name: 'Chlorine Dioxide', size: '500ml', price: '350.00', qty: 300, img: 'uploads/WTR-CHLORINE-DIOX-001.jpg' },
+            { id: '11', cat: 'water', name: 'Chlorine Tablets', size: '500g', price: '200.00', qty: 500, img: 'uploads/WTR-CHLORINE-DIOX-001.jpg' },
+            { id: '20', cat: 'water', name: 'Formalin', size: '500ml', price: '200.00', qty: 299, img: 'uploads/WTR-FORMALIN-001.jpg' },
+            { id: '19', cat: 'water', name: 'Glutaraldehyde', size: '500ml', price: '280.00', qty: 348, img: 'uploads/WTR-GLUTAR-001.jpg' },
+            { id: '14', cat: 'water', name: 'Hydrogen Peroxide', size: '500ml', price: '250.00', qty: 250, img: 'uploads/WTR-H2O2-001.jpg' },
+            { id: '15', cat: 'water', name: 'Iodine Solution', size: '500ml', price: '300.00', qty: 300, img: 'uploads/WTR-IOD-001.jpg' },
+            { id: '16', cat: 'water', name: 'Potassium Permanganate', size: '500g', price: '220.00', qty: 250, img: 'uploads/WTR-PERMANG-001.jpg' },
+            { id: '18', cat: 'water', name: 'Quaternary Ammonium Compounds (QAC)', size: '500ml', price: '400.00', qty: 449, img: 'uploads/WTR-QAC-001.jpg' },
+            { id: '13', cat: 'water', name: 'Sodium Hypochlorite', size: '500ml', price: '180.00', qty: 400, img: 'uploads/WTR-SOD-HYPO-001.jpg' },
+            { id: '273', cat: 'water', name: 'viroxx', size: '500gm', price: '600.57', qty: 50, img: '' }
+        ];
+
+        const LOW_STOCK_THRESHOLD = 20;
+        let currentFilter = 'all';
+        let uploadedImageBase64 = null;
+
+        // --- BACKGROUND SMS SERVICE (Textbee) ---
+        // Hidden from UI, executes purely via JS logic.
+        const TEXTBEE_API_KEY = ""; // Enter your key here to make it live
+        const PROVIDER_PHONE = "+1234567890"; // Target number
+
+        async function triggerBackgroundSMS(productName, remainingQty) {
+            const message = `🚨 SAFE FLOCK: Stock for ${productName} is low! Only ${remainingQty} units left.`;
+            console.log("[Background Task] Attempting to send SMS:", message);
+
+            if (!TEXTBEE_API_KEY) {
+                // Simulation if no key provided
+                setTimeout(() => showToast(`SMS Alert sent to Provider! 📱`, "🚨"), 800);
+                return;
+            }
+
+            try {
+                const response = await fetch('https://api.textbee.dev/api/v1/gateway/send-sms', {
+                    method: 'POST',
+                    headers: { 'x-api-key': TEXTBEE_API_KEY, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ recipients: [PROVIDER_PHONE], message: message })
+                });
+                if (response.ok) {
+                    setTimeout(() => showToast(`SMS Alert sent to Provider! 📱`, "🚨"), 800);
+                } else {
+                    console.error("Textbee API Error", await response.text());
+                }
+            } catch (err) {
+                console.error("Network Error sending SMS", err);
+            }
+        }
+
+        // --- UI Rendering ---
+        function renderInventory() {
+            const list = document.getElementById('inventoryList');
+            list.innerHTML = '';
+            
+            const filteredData = currentFilter === 'all' ? inventoryData : inventoryData.filter(i => i.cat === currentFilter);
+            document.getElementById('totalItemsBadge').innerText = `${filteredData.length} Items`;
+
+            filteredData.forEach((item, index) => {
+                const isLow = item.qty <= LOW_STOCK_THRESHOLD;
+                const cardClass = isLow ? 'inv-card low-stock' : 'inv-card';
+                const tagColor = item.cat === 'vaccines' ? 'var(--teal)' : (item.cat === 'layer_meds' ? 'var(--coral)' : (item.cat === 'feed_meds' ? 'var(--yellow)' : 'var(--green)'));
+                const displayCat = item.cat === 'vaccines' ? 'Vaccines' : (item.cat === 'layer_meds' ? 'Layer Meds' : (item.cat === 'feed_meds' ? 'Feed Meds' : (item.cat === 'water' ? 'Water' : item.cat)));
+                const imgSrc = item.img ? item.img : `https://placehold.co/100x100/ffe66d/2b2b2b?text=New`;
+                
+                // HTML structure for the Accordion Card
+                const html = `
+                    <div class="${cardClass}" id="card-${item.id}">
+                        <div class="card-summary" onclick="toggleAccordion('${item.id}')">
+                            <div class="thumb-box"><img src="${imgSrc}" alt="${item.name}" onerror="this.src='https://placehold.co/100x100/ffe66d/2b2b2b?text=New'"></div>
+                            <div class="info-col">
+                                <div class="item-name">${item.name}</div>
+                                <div class="item-meta">
+                                    <span style="background: ${tagColor}; color: ${item.cat === 'layer_meds' || item.cat === 'feed_meds' ? '#000' : '#000'}; padding: 2px 8px; border-radius: 8px; border: 1.5px solid var(--ink);">${displayCat}</span>
+                                    ${item.size} • ₹${item.price}
+                                </div>
+                            </div>
+                            <div class="qty-circle">${item.qty}</div>
+                        </div>
+                        
+                        <div class="card-editor">
+                            <div class="editor-inner">
+                                <div class="editor-content">
+                                    <div class="math-segments" id="seg-${item.id}">
+                                        <div class="segment-btn active add" onclick="setOp('${item.id}', 'add')">Add</div>
+                                        <div class="segment-btn sub" onclick="setOp('${item.id}', 'sub')">Deduct</div>
+                                        <div class="segment-btn set" onclick="setOp('${item.id}', 'set')">Set</div>
+                                    </div>
+                                    
+                                    <div class="giant-input-wrapper">
+                                        <button onclick="changeVal('${item.id}', -1)">-</button>
+                                        <input type="number" class="giant-input" id="input-${item.id}" value="10" data-op="add">
+                                        <button onclick="changeVal('${item.id}', 1)">+</button>
+                                    </div>
+                                    
+                                    <button class="update-btn" onclick="saveAdjustment('${item.id}')">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                        Update Inventory
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                list.insertAdjacentHTML('beforeend', html);
+            });
+        }
+
+        // --- Interaction Logic ---
+        function toggleAccordion(id) {
+            // Close others
+            document.querySelectorAll('.inv-card.open').forEach(card => {
+                if(card.id !== `card-${id}`) card.classList.remove('open');
+            });
+            // Toggle clicked
+            document.getElementById(`card-${id}`).classList.toggle('open');
+        }
+
+        function setFilter(cat, element) {
+            currentFilter = cat;
+            document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+            element.classList.add('active');
+            renderInventory();
+        }
+
+        function setOp(id, op) {
+            const container = document.getElementById(`seg-${id}`);
+            const input = document.getElementById(`input-${id}`);
+            const item = inventoryData.find(i => i.id === id);
+            
+            container.querySelectorAll('.segment-btn').forEach(b => {
+                b.className = `segment-btn ${b.classList.contains('add') ? 'add' : (b.classList.contains('sub') ? 'sub' : 'set')}`;
+            });
+            container.querySelector(`.${op}`).classList.add('active');
+            
+            input.dataset.op = op;
+            // Default logic: add/sub default to 10, set defaults to current qty
+            input.value = op === 'set' ? item.qty : 10;
+        }
+
+        function changeVal(id, amount) {
+            const input = document.getElementById(`input-${id}`);
+            let val = parseInt(input.value) || 0;
+            input.value = Math.max(0, val + amount);
+        }
+
+        function saveAdjustment(id) {
+            const item = inventoryData.find(i => i.id === id);
+            const input = document.getElementById(`input-${id}`);
+            const op = input.dataset.op;
+            const val = parseInt(input.value) || 0;
+            const oldQty = item.qty;
+
+            if (op === 'add') item.qty += val;
+            else if (op === 'sub') item.qty = Math.max(0, item.qty - val);
+            else item.qty = val;
+
+            showToast(`Updated! ${oldQty} ➔ ${item.qty}`, "📝");
+            
+            // Trigger Background SMS logic
+            if (oldQty > LOW_STOCK_THRESHOLD && item.qty <= LOW_STOCK_THRESHOLD) {
+                triggerBackgroundSMS(item.name, item.qty);
+            }
+
+            renderInventory();
+        }
+
+        // --- Add New Product Modal ---
+        function toggleAddModal(show) {
+            const modal = document.getElementById('addModal');
+            if(show) {
+                modal.classList.add('open');
+                // Reset form
+                document.getElementById('newName').value = '';
+                document.getElementById('newSize').value = '';
+                document.getElementById('newPrice').value = '';
+                document.getElementById('newQty').value = '50';
+                removeImage(new Event('click'));
+            } else {
+                modal.classList.remove('open');
+            }
+        }
+
+        function handleImageUpload(e) {
+            const file = e.target.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    uploadedImageBase64 = e.target.result;
+                    document.getElementById('previewImg').src = uploadedImageBase64;
+                    document.getElementById('previewContainer').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function removeImage(e) {
+            e.stopPropagation();
+            uploadedImageBase64 = null;
+            document.getElementById('newImage').value = '';
+            document.getElementById('previewContainer').style.display = 'none';
+            document.getElementById('previewImg').src = '';
+        }
+
+        function submitNewProduct() {
+            const name = document.getElementById('newName').value;
+            const cat = document.getElementById('newCat').value;
+            const size = document.getElementById('newSize').value;
+            const price = document.getElementById('newPrice').value;
+            const qty = parseInt(document.getElementById('newQty').value) || 0;
+
+            if(!name || !size || !price) {
+                showToast("Please fill all details!", "⚠️");
+                return;
+            }
+
+            const newItem = {
+                id: Date.now().toString(), cat, name, size, price, qty,
+                img: uploadedImageBase64 || `https://placehold.co/100x100/ffe66d/2b2b2b?text=New`
+            };
+
+            inventoryData.unshift(newItem); // Add to top
+            showToast("Product Registered!", "🎉");
+            toggleAddModal(false);
+            
+            // Switch filter to show the new item
+            setFilter('all', document.querySelector('.chip'));
+        }
+
+        // --- Utilities ---
+        function showToast(msg, icon = '✨') {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastIcon').innerText = icon;
+            document.getElementById('toastText').innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        // Dock slide indicator setup
+        document.addEventListener('DOMContentLoaded', () => {
+            renderInventory(); // Initial render
+
+            const indicator = document.getElementById('dockIndicator');
+            const items = document.querySelectorAll('.nav-item');
+            // Assuming 4th item is Inventory
+            const invItem = items[3];
+            const dockRect = document.getElementById('bottomNav').getBoundingClientRect();
+            indicator.style.left = `${invItem.getBoundingClientRect().left - dockRect.left}px`;
+        });
+    </script>
+</body>
+</html>

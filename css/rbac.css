@@ -1,0 +1,115 @@
+/* ============================================================
+ * rbac.css — RBAC UI (role badge, 403 modal, logistics styles)
+ * ============================================================ */
+
+/* Role badge shown in the page header */
+.rbac-role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 1000;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  background: rgba(212, 175, 55, 0.1);
+  color: #f5d76c;
+  box-shadow: 0 0 14px rgba(212, 175, 55, 0.12);
+  margin-left: 6px;
+}
+
+/* 403 Unauthorized modal */
+.sfs-403-wrap {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 9998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(6, 8, 18, 0.92);
+}
+.sfs-403-card {
+  max-width: 480px;
+  width: 100%;
+  border-radius: 22px;
+  padding: 34px 26px;
+  text-align: center;
+  background: rgba(6, 8, 18, 0.85);
+  border: 1px solid rgba(244, 63, 94, 0.5);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5), 0 0 40px rgba(244, 63, 94, 0.12);
+  color: #f1f5f9;
+}
+.sfs-403-card .code {
+  font-size: 2.6rem;
+  font-weight: 1000;
+  color: #f87171;
+}
+.sfs-403-card .msg { margin-top: 8px; font-weight: 700; color: rgba(226, 232, 240, 0.85); }
+.sfs-403-card .sub { margin-top: 6px; font-size: 0.85rem; color: rgba(226, 232, 240, 0.55); }
+.sfs-403-actions { margin-top: 20px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+/* Logistics dashboard */
+.sfs-logistics-hero {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(16, 185, 129, 0.08));
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 18px;
+  padding: 18px;
+}
+.sfs-order-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(212, 175, 55, 0.28);
+  border-radius: 16px;
+  padding: 16px;
+  margin-top: 14px;
+  box-shadow: 0 0 18px rgba(212, 175, 55, 0.08);
+}
+.sfs-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 1000;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+.sfs-status-pill.pending    { color: #fbbf24; background: rgba(245, 158, 11, 0.12); border-color: rgba(245, 158, 11, 0.4); }
+.sfs-status-pill.in-transit { color: #38bdf8; background: rgba(56, 189, 248, 0.12); border-color: rgba(56, 189, 248, 0.4); }
+.sfs-status-pill.delivered  { color: #34d399; background: rgba(16, 185, 129, 0.12); border-color: rgba(16, 185, 129, 0.4); }
+
+.sfs-order-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+.sfs-order-item img { width: 40px; height: 40px; object-fit: cover; border-radius: 10px; background: rgba(255,255,255,0.06); }
+.sfs-btn {
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  background: rgba(212, 175, 55, 0.12);
+  color: #f5d76c;
+  border-radius: 14px;
+  padding: 10px 14px;
+  font-weight: 1000;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: transform 0.1s, box-shadow 0.2s;
+}
+.sfs-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 22px rgba(212, 175, 55, 0.2); }
+.sfs-btn.primary { background: rgba(212, 175, 55, 0.22); }
+.sfs-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }

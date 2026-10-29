@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SafeFlock Solution - IoT</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="doodle-dark">
+
+  <a class="skip-link" href="#main">Skip</a>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <div class="brand">
+        <span class="brand-name" aria-label="SAFEFLOCK SOLUTION">SAFEFLOCK SOLUTION</span>
+      </div>
+
+      <button class="hamburger" type="button" aria-label="Open menu" aria-controls="sidebar" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+
+      <nav class="top-nav" aria-label="Primary">
+        <a class="top-nav-link" href="index.php">🏠 Home</a>
+        <a class="top-nav-link" href="products.php?category=all">🛒 Products</a>
+        <a class="top-nav-link" href="qr.php">📶 Verify QR</a>
+        <a class="top-nav-link" href="inventory.php">📝 Inventory</a>
+        <a class="top-nav-link" href="auth/logout.php">🚪 Logout</a>
+      </nav>
+    </div>
+  </header>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-title">Cold Chain</div>
+
+      <div style="margin-top:12px;">
+        <a href="index.php">🏠 Home</a>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-title">Actions</div>
+        <div class="sidebar-actions">
+          <a href="#" id="iotRefresh">🔄 Refresh sensors</a>
+          <a href="qr.php">📶 Verify QR</a>
+          <a href="products.php?category=all">🛒 Products</a>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main id="main" class="page">
+    <section class="section" aria-label="IoT Cold Chain Monitor">
+      <div class="container">
+        <div class="section-head">
+          <h2>IoT Cold Chain &amp; Telemetry Monitor</h2>
+          <p class="muted">Live thermal telemetry readings from cold storage bays, vaccine refrigerators and transit vans.</p>
+          <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;">
+            <button class="btn btn-primary" type="button" id="iotRefreshBtn">🔄 Refresh All Sensors</button>
+            <label class="btn" style="display:inline-flex; align-items:center; gap:8px; cursor:pointer;">
+              <input type="checkbox" id="autoRefresh" checked style="accent-color:#d4af37;" />
+              Auto-refresh (15s)
+            </label>
+          </div>
+        </div>
+
+        <div id="iotStatus" class="muted" style="font-weight:900; margin-bottom:14px;">Loading sensor telemetry…</div>
+
+        <div class="grid cards" id="sensorGrid" style="margin-bottom:22px;">
+          <div class="card">Loading sensors…</div>
+        </div>
+
+        <div class="card" style="padding:18px;">
+          <div class="section-head" style="margin-bottom:10px;">
+            <h3 style="margin:0 0 4px 0;">Recent Temperature Trace</h3>
+            <p class="muted">Safety threshold enforced at 8.0°C for live viral vaccines.</p>
+          </div>
+          <div style="position:relative; width:100%; height:280px;">
+            <canvas id="tempChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        <div class="footer-brand">SafeFlock Solution</div>
+        <div class="muted">IoT + QR + regional chain inventory for poultry layer industry.</div>
+      </div>
+      <div class="footer-copy muted">© <span id="year"></span></div>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      'use strict';
+
+      const sensorGrid = document.getElementById('sensorGrid');
+      const iotStatus = document.getElementById('iotStatus');
+      const chartCanvas = document.getElementById('tempChart');
+      const ctx = chartCanvas.getContext('2d');
+      const autoRefreshEl = document.getElementById('autoRefresh');
+
+      const READING_LABELS = {
+        cold_room: { label: 'Cold Room', unit: '°C', color: '#22d3ee' },
+        shelf_temp: { label: 'Shelf Temp', unit: '°C', color: '#fbbf24' },
+        humidity: { label: 'Humidity', unit: '%', color: '#34d399' }
+      };
+      const THRESHOLD = 8.0;
+
+      function esc(s) {
+        return String(s == null ? '' : s)
+          .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      function statusBadge(status) {
+        const map = { OK: ['OK', 'var(--ok, #34d399)'], WARNING: ['WARNING', 'var(--warn, #fbbf24)'], CRITICAL: ['CRITICAL', 'var(--crit, #f43f5e)'] };
+        const [label, color] = map[String(status || 'OK').toUpperCase()] || map.OK;
+        return '<span style="font-weight:1000; color:' + color + ';">' + label + '</span>';
+      }
+
+      function render(readings) {
+        if (!readings || !readings.length) {
+          sensorGrid.innerHTML = '<div class="card">No sensor readings recorded yet.</div>';
+          iotStatus.textContent = 'No telemetry found.';
+          return;
+        }
+
+        // Latest value per product x reading_type
+        const latest = {};
+        const series = []; // chronological for the chart
+        readings.forEach(function (r) {
+          const key = (r.product_id || 0) + ':' + r.reading_type;
+          if (!latest[key]) latest[key] = r;
+          series.push(r);
+        });
+
+        const cards = Object.keys(latest).map(function (key) {
+          const r = latest[key];
+          const meta = READING_LABELS[r.reading_type] || { label: r.reading_type, unit: '', color: '#94a3b8' };
+          const val = Number(r.value);
+          const bad = (r.reading_type !== 'humidity') && val > THRESHOLD;
+          return '<div class="card" style="min-width:220px; max-width:100%;">' +
+            '<div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">' +
+              '<span class="muted" style="font-weight:1000;">' + esc(meta.label) + '</span>' +
+              statusBadge(r.status) +
+            '</div>' +
+            '<div style="font-weight:1000; font-size:26px; margin-top:10px;">' +
+              '<span style="color:' + meta.color + ';">' + val.toFixed(1) + '</span><span class="muted" style="font-size:14px;">' + esc(meta.unit) + '</span>' +
+            '</div>' +
+            (bad ? '<div class="muted" style="margin-top:8px; font-weight:900; color:#f43f5e;">⚠ Above 8.0°C limit</div>' : '') +
+            '<div class="muted" style="margin-top:8px; font-size:12px; font-weight:800;">' + esc(r.recorded_at || '') + '</div>' +
+            '<div class="muted" style="font-size:12px; font-weight:800;">Product #' + esc(r.product_id || '—') + '</div>' +
+          '</div>';
+        }).join('');
+
+        sensorGrid.innerHTML = cards;
+        iotStatus.textContent = 'Showing ' + Object.keys(latest).length + ' live sensor feeds.';
+        window.__lastReadings = readings;
+        drawChart(series);
+      }
+
+      function drawChart(series) {
+        const w = chartCanvas.width = Math.max(300, chartCanvas.clientWidth);
+        const h = chartCanvas.height = 280;
+        ctx.clearRect(0, 0, w, h);
+        ctx.fillStyle = 'rgba(255,255,255,0.92)';
+        ctx.font = '700 11px sans-serif';
+
+        const temps = series.filter(r => r.reading_type === 'cold_room' || r.reading_type === 'shelf_temp')
+          .map(r => ({ label: r.reading_type, value: Number(r.value) }))
+          .slice(-40);
+
+        if (!temps.length) {
+          ctx.fillText('No temperature readings to plot.', 14, 20);
+          return;
+        }
+
+        const padL = 40, padR = 16, padT = 18, padB = 30;
+        const plotW = w - padL - padR, plotH = h - padT - padB;
+        const maxV = Math.max(THRESHOLD, ...temps.map(t => t.value)) + 1;
+        const minV = Math.min(0, ...temps.map(t => t.value)) - 1;
+
+        // gridlines
+        ctx.strokeStyle = 'rgba(148,163,184,0.25)';
+        ctx.fillStyle = 'rgba(226,232,240,0.7)';
+        for (let i = 0; i <= 4; i++) {
+          const v = minV + ((maxV - minV) * i) / 4;
+          const y = padT + plotH - ((v - minV) / (maxV - minV)) * plotH;
+          ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(w - padR, y); ctx.stroke();
+          ctx.fillText(v.toFixed(1) + '°', 6, y + 4);
+        }
+
+        // threshold line
+        const thY = padT + plotH - ((THRESHOLD - minV) / (maxV - minV)) * plotH;
+        ctx.strokeStyle = '#f43f5e';
+        ctx.setLineDash([6, 5]);
+        ctx.beginPath(); ctx.moveTo(padL, thY); ctx.lineTo(w - padR, thY); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = '#f43f5e';
+        ctx.fillText('Limit 8.0°C', w - padR - 78, thY - 6);
+
+        // data
+        const step = temps.length > 1 ? plotW / (temps.length - 1) : plotW;
+        ctx.lineWidth = 2.2;
+        [['cold_room', '#22d3ee'], ['shelf_temp', '#fbbf24']].forEach(function (pair) {
+          const type = pair[0], color = pair[1];
+          const pts = [];
+          temps.forEach(function (t, i) {
+            if (t.label !== type) return;
+            const x = padL + i * step;
+            const y = padT + plotH - ((t.value - minV) / (maxV - minV)) * plotH;
+            pts.push([x, y]);
+          });
+          if (!pts.length) return;
+          ctx.strokeStyle = color;
+          ctx.beginPath();
+          pts.forEach(function (p, i) { i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]); });
+          ctx.stroke();
+          pts.forEach(function (p) {
+            ctx.fillStyle = color;
+            ctx.beginPath(); ctx.arc(p[0], p[1], 3, 0, Math.PI * 2); ctx.fill();
+          });
+        });
+
+        // x labels
+        ctx.fillStyle = 'rgba(226,232,240,0.7)';
+        ctx.fillText('Latest ' + temps.length + ' readings', padL, h - 10);
+      }
+
+      function loadSensors() {
+        iotStatus.textContent = 'Refreshing sensor telemetry…';
+        fetch('api/iot_readings.php', { credentials: 'same-origin' })
+          .then(function (res) {
+            if (!res.ok) throw new Error('Failed to load telemetry');
+            return res.json();
+          })
+          .then(function (data) {
+            if (!data.ok) throw new Error(data.error || 'Failed to load telemetry');
+            render(data.readings || []);
+          })
+          .catch(function (e) {
+            iotStatus.textContent = '⚠ ' + e.message;
+            sensorGrid.innerHTML = '<div class="card">Could not reach the telemetry API.</div>';
+          });
+      }
+
+      document.getElementById('iotRefreshBtn').addEventListener('click', loadSensors);
+      document.getElementById('iotRefresh').addEventListener('click', function (e) { e.preventDefault(); loadSensors(); });
+      window.addEventListener('resize', function () { if (window.__lastReadings) drawChart(window.__lastReadings); });
+      document.getElementById('year').textContent = new Date().getFullYear();
+
+      loadSensors();
+      setInterval(function () {
+        if (autoRefreshEl && autoRefreshEl.checked) loadSensors();
+      }, 15000);
+    })();
+  </script>
+
+  <script src="js/rbac-nav.js"></script>
+
+  <!-- Mobile Bottom Dock -->
+    <nav class="mobile-dock" aria-label="Mobile navigation">
+    <div class="dock-inner">
+      <div id="mobile-dock-pill"></div>
+      <a href="index.php" class="dock-btn" data-page="home"><i class="fa-solid fa-house"></i><span>Home</span></a>
+      <a href="products.php" class="dock-btn" data-page="shop"><i class="fa-solid fa-pills"></i><span>Shop</span></a>
+      <a href="orders.php" class="dock-btn" data-page="orders"><i class="fa-solid fa-box-open"></i><span>Orders</span></a>
+      <a href="qr.php" class="dock-btn" data-page="verify"><i class="fa-solid fa-qrcode"></i><span>Verify QR</span></a>
+      <a href="settings.php" class="dock-btn active" data-page="settings"><i class="fa-solid fa-gear"></i><span>Settings</span></a>
+      <a href="auth/logout.php" class="dock-btn dock-btn-logout" data-page="logout"><i class="fa-solid fa-arrow-right-from-bracket"></i><span>Logout</span></a>
+    </div>
+  </nav>
+  <script src="js/mobile-dock.js"></script>
+</body>
+</html>
+
+
+
+
+

@@ -1,0 +1,573 @@
+(function () {
+  const qs = (s) => document.querySelector(s);
+  const qsa = (s) => Array.from(document.querySelectorAll(s));
+
+  const yearEl = qs('#year');
+  if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+  const body = document.body;
+  const hamburger = qs('.hamburger');
+  function setNavOpen(open) {
+    body.classList.toggle('nav-open', !!open);
+    if (hamburger) hamburger.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+  hamburger?.addEventListener('click', () => {
+    const isOpen = body.classList.contains('nav-open');
+    setNavOpen(!isOpen);
+  });
+
+  qsa('.sidebar a').forEach((a) => a.addEventListener('click', () => setNavOpen(false)));
+
+  const grid = qs('#productGrid');
+  let lastQuery = '';
+  let lastCategory = 'all';
+
+
+  const searchInput = qs('#search');
+  const dropdown = qs('#searchDropdown');
+
+  function showDropdown(items) {
+    if (!dropdown) return;
+
+    if (!items || !items.length) {
+      dropdown.hidden = true;
+      dropdown.innerHTML = '';
+      return;
+    }
+
+    dropdown.hidden = false;
+    dropdown.innerHTML = items
+      .map((p) => {
+        return `
+        <button type="button" class="dropdown-item" data-pid="${escapeHtml(p.id)}" data-cat="${escapeHtml(p.category)}">
+          <div class="dropdown-title">${escapeHtml(p.name)}</div>
+          <div class="dropdown-meta">${escapeHtml(p.category)} · ${escapeHtml(p.sku)}</div>
+        </button>
+      `;
+      })
+      .join('');
+  }
+
+
+  function hideDropdown() {
+    if (!dropdown) return;
+    dropdown.hidden = true;
+    dropdown.innerHTML = '';
+  }
+
+  if (searchInput) {
+    searchInput.addEventListener('blur', () => {
+      // slight delay so click handlers on dropdown can run
+      setTimeout(hideDropdown, 120);
+    });
+  }
+
+
+  function normalizeQuery(s) {
+    return (s || '').trim().toLowerCase();
+  }
+
+  function mapShortKeywords(q) {
+    // Make typing like "wa" match Water-related products.
+    if (!q) return q;
+    const x = q.trim().toLowerCase();
+
+    const waterLike = ['wa', 'wat', 'wate', 'watr', 'water'];
+    if (waterLike.includes(x) || x.startsWith('wa')) return 'water';
+
+    const vaccineLike = ['vac', 'vacc', 'vaccin', 'vax', 'vaccine'];
+    if (vaccineLike.includes(x) || x.startsWith('vac')) return 'vaccine';
+
+    return q;
+  }
+
+
+  if (searchInput) {
+    searchInput.addEventListener('input', () => {
+      lastQuery = normalizeQuery(searchInput.value);
+
+      // If products are not loaded yet, do not render dropdown results.
+      if (!productsLoaded) return;
+
+
+
+      // If user is searching from Home, redirect to products page when they press Enter.
+      // (We keep the dropdown suggestions working without rendering a full results list on Home.)
+      if (location.pathname.endsWith('index.php')) {
+        // keep dropdown suggestions behavior
+      } else {
+        renderProducts(lastProducts);
+      }
+
+
+      // dropdown suggestions: show ALL products (category + name match typed query)
+      const q = lastQuery;
+      const mappedQ = mapShortKeywords(q);
+
+      const dropdownList = lastProducts
+        .filter((p) => {
+          if (!mappedQ) return true;
+          const name = (p.name || '').toLowerCase();
+          const desc = (p.description || '').toLowerCase();
+          const cat = (p.category || '').toLowerCase();
+          return name.includes(mappedQ) || desc.includes(mappedQ) || cat.includes(mappedQ);
+        })
+        .slice(0, 200); // prevent huge DOM
+
+      showDropdown(dropdownList);
+
+    });
+
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (dropdown) {
+          dropdown.hidden = true;
+          dropdown.innerHTML = '';
+        }
+      }
+    });
+  }
+
+  // click outside closes dropdown
+  document.addEventListener('click', (e) => {
+    if (!dropdown) return;
+    if (!searchInput) return;
+    const clickedInside = dropdown.contains(e.target) || searchInput.contains(e.target);
+    if (!clickedInside) {
+      hideDropdown();
+    }
+  });
+
+  // delegate dropdown clicks to open products page
+  if (dropdown) {
+    dropdown.addEventListener('click', async (e) => {
+      const btn = e.target.closest('button[data-pid]');
+      if (!btn) return;
+
+      const q = normalizeQuery(searchInput?.value);
+      const mapped = mapShortKeywords(q);
+
+      // Open products page with the current typed query.
+      location.href = `products.php?search=${encodeURIComponent(mapped || q)}`;
+    });
+  }
+
+  // show dropdown on focus (so user sees products list while clicking)
+  searchInput?.addEventListener('focus', () => {
+    if (!dropdown) return;
+    if (lastProducts && lastProducts.length) {
+      // if user hasn't typed anything yet, show all products (capped by showDropdown)
+      showDropdown(lastProducts.slice(0, 200));
+    }
+  });
+
+
+
+
+
+  // Load products from DB
+  let lastProducts = [];
+
+  let productsLoaded = false;
+
+  async function fetchProducts() {
+    try {
+      const url = 'api/products.php';
+      const res = await fetch(url);
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error || 'Failed');
+      lastProducts = data.products || [];
+      productsLoaded = true;
+      renderProducts(lastProducts);
+    } catch (e) {
+      if (grid) grid.innerHTML = '<div class="card">Error loading products.</div>';
+      console.error(e);
+    }
+  }
+
+
+  function renderProducts(products) {
+    if (!grid) return;
+
+    // Sidebar-driven filter (category)
+    const wantedCategory = lastCategory || 'all';
+
+    // If the new category layout exists, render into matching grids by category.
+    const grids = {
+      vaccines: qs('#grid-vaccines'),
+      feed_meds: qs('#grid-feed_meds'),
+      layer_meds: qs('#grid-layer_meds'),
+      water: qs('#grid-water'),
+    };
+    const hasCategoryLayout = Object.values(grids).some((el) => el);
+
+    if (hasCategoryLayout) {
+      const q = lastQuery;
+      const filterByQuery = (p) => {
+        if (!q) return true;
+        const name = (p.name || '').toLowerCase();
+        const desc = (p.description || '').toLowerCase();
+        const cat = (p.category || '').toLowerCase();
+        if (name.includes(q) || desc.includes(q) || cat.includes(q)) return true;
+        if (q.includes('vaccine')) return cat.includes('vaccin');
+        return false;
+      };
+
+      const byCat = {
+        vaccines: [],
+        feed_meds: [],
+        layer_meds: [],
+        water: [],
+      };
+      products.forEach((p) => {
+        const c = String(p.category || '').toLowerCase();
+        if (byCat[c]) byCat[c].push(p);
+      });
+
+      Object.entries(grids).forEach(([cat, el]) => {
+        if (!el) return;
+        const list = byCat[cat] || [];
+        const filtered = list.filter(filterByQuery);
+        if (!filtered.length) {
+          el.innerHTML = '<div class="card">No products.</div>';
+          return;
+        }
+        el.innerHTML = filtered.map((p) => `
+          <div class="card">
+            <div class="card-badge ${p.category === 'vaccines' ? 'ok' : ''}">• ${p.category}</div>
+            <h3>${escapeHtml(p.name)}</h3>
+            <p class="muted">SKU: <span class="mono">${escapeHtml(p.sku)}</span></p>
+            <p class="muted">${escapeHtml(p.description || '')}</p>
+            <div class="card-actions">
+              <button class="btn btn-primary" type="button" data-verify-token="${escapeHtml(makeTokenForProduct(p))}">Verify QR</button>
+              <button class="btn" type="button" data-load-inventory="${p.id}">View chain inventory</button>
+            </div>
+          </div>
+        `).join('');
+      });
+
+      qsa('[data-verify-token]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const token = btn.getAttribute('data-verify-token');
+          location.href = 'qr.php?token=' + encodeURIComponent(token);
+        });
+      });
+      qsa('[data-load-inventory]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const productId = Number(btn.getAttribute('data-load-inventory'));
+          await loadInventory({ productId });
+        });
+      });
+      return;
+    }
+    if (!products || products.length === 0) {
+      grid.innerHTML = '<div class="card">No products found.</div>';
+      return;
+    }
+
+    let filtered = products;
+
+    if (lastQuery) {
+      const q = lastQuery;
+      filtered = products.filter((p) => {
+        const name = (p.name || '').toLowerCase();
+        const desc = (p.description || '').toLowerCase();
+        const cat = (p.category || '').toLowerCase();
+
+        // direct match
+        if (name.includes(q) || desc.includes(q) || cat.includes(q)) return true;
+
+        // very light keyword mapping to category names
+        if (q.includes('vaccine')) return cat.includes('vaccine') || cat.includes('vaccin');
+        if (q.includes('chlorine')) return cat.includes('feed');
+        if (q.includes('taxi') || q.includes('binder')) return cat.includes('feed');
+        if (q.includes('antibi') || q.includes('oxy') || q.includes('levo')) return cat.includes('layer');
+        if (q.includes('vitamin') || q.includes('mineral') || q.includes('probiotic') || q.includes('herbal') || q.includes('supplement')) {
+          return cat.includes('feed') || cat.includes('layer');
+        }
+
+        return false;
+      });
+    }
+
+    if (!filtered || filtered.length === 0) {
+      grid.innerHTML = '<div class="card">No products found for your search.</div>';
+      return;
+    }
+
+    grid.innerHTML = filtered.map((p) => {
+
+      return `
+        <div class="card">
+          <div class="card-badge ${p.category === 'vaccines' ? 'ok' : ''}">• ${p.category}</div>
+          <h3>${escapeHtml(p.name)}</h3>
+          <p class="muted">SKU: <span class="mono">${escapeHtml(p.sku)}</span></p>
+          <p class="muted">${escapeHtml(p.description || '')}</p>
+          <div class="card-actions">
+            <button class="btn btn-primary" type="button" data-verify-token="${escapeHtml(makeTokenForProduct(p))}">Verify QR</button>
+            <button class="btn" type="button" data-load-inventory="${p.id}">View chain inventory</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    qsa('[data-verify-token]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const token = btn.getAttribute('data-verify-token');
+        // QR verification is on separate page
+        location.href = 'qr.php?token=' + encodeURIComponent(token);
+      });
+    });
+
+
+    qsa('[data-load-inventory]').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const productId = Number(btn.getAttribute('data-load-inventory'));
+        await loadInventory({ productId });
+      });
+    });
+  }
+
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '<', '>': '>', '"': '"', "'": '&#039;' }[m]));
+  }
+
+  // The DB token format is: VCX-NEW-001|BATCH-7A92 (for demo we map by product sku/name)
+  // For UI convenience we hardcode tokens for the products we seeded.
+  function makeTokenForProduct(p) {
+    const name = (p.name || '').toLowerCase();
+    if (name.includes('newcastle')) return 'VCX-NEW-001|BATCH-7A92';
+    if (name.includes('gumboro')) return 'VCX-GUMB-001|BATCH-4P18';
+    if (name.includes('chlorine')) return 'FMD-CHL-001|BATCH-FMD-2X1';
+    if (name.includes('taximbinder')) return 'FMD-TAX-001|BATCH-TXB-001';
+    if (name.includes('oxy-tyl') || name.includes('oxy')) return 'MED-OXY-001|BATCH-LMD-11C';
+    if (name.includes('levo-tyl')) return 'MED-LTX-001|BATCH-LMD-11C';
+    return 'VCX-NEW-001|BATCH-7A92';
+  }
+
+  // IoT/QR demo UI (only exists on qr.php page)
+  const verifyBtn = qs('#verifyBtn');
+  const qrInput = qs('#qrInput');
+  const verifyResult = qs('#verifyResult');
+
+  async function verifyQr() {
+
+    const token = (qrInput?.value || '').trim();
+    if (!token) {
+      verifyResult.innerHTML = '<b>Error:</b> Enter QR token.';
+      return;
+    }
+
+    try {
+      const res = await fetch('api/verify_qr.php?token=' + encodeURIComponent(token));
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error || 'Verification failed');
+
+      const v = data.verification;
+      const inv = data.inventory;
+
+      const invText = inv && typeof inv.qty !== 'undefined'
+        ? `Inventory: <b>${inv.qty}</b> (${escapeHtml(inv.updated_at || '')})`
+        : 'Inventory: not found';
+
+      verifyResult.innerHTML = `
+        <div style="font-weight:900; margin-bottom:8px;">✅ QR Verified (demo)</div>
+        <div class="muted" style="font-weight:900;">Batch: <span class="mono">${escapeHtml(v.batch_no)}</span></div>
+        <div class="muted" style="font-weight:900;">Product: <b>${escapeHtml(v.product)}</b></div>
+        <div class="muted" style="font-weight:900;">Shop: <b>${escapeHtml(v.shop)} </b><span class="muted">(${escapeHtml(v.region)})</span></div>
+        <div class="muted" style="font-weight:900;">IoT: <b>${escapeHtml(v.iot_status)}</b></div>
+        <div class="muted" style="font-weight:900; margin-top:8px;">${invText}</div>
+      `;
+
+      // Load IoT evidence for this product (single inventory model)
+      if (v && v.product) {
+        await loadIotEvidence();
+      }
+
+    } catch (e) {
+      verifyResult.innerHTML = '<b>Error:</b> ' + escapeHtml(e.message || 'Failed');
+    }
+  }
+
+  verifyBtn?.addEventListener('click', verifyQr);
+  qrInput?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') verifyQr();
+  });
+
+  // IoT evidence section
+  async function loadIotEvidence() {
+    const token = (qrInput?.value || '').trim();
+    if (!token) return;
+
+    try {
+      const res = await fetch('api/verify_qr.php?token=' + encodeURIComponent(token));
+      const data = await res.json();
+      if (!data.ok) return;
+
+      // Need shop/product IDs; simplest: request iot readings without ids (demo)
+      // Better: extend backend; keeping simple.
+      const r = await fetch('api/iot_readings.php');
+      const j = await r.json();
+      const rows = j.readings || j.iot_readings || [];
+
+      const table = qs('#iotTable');
+      if (!table) return;
+      if (!rows.length) {
+        table.innerHTML = '<div class="stat">No IoT evidence.</div>';
+        return;
+      }
+
+      table.innerHTML = rows.slice(0, 12).map((x) => {
+        const color = x.status === 'OK' ? 'rgba(34,197,94,0.22)' : (x.status === 'WARNING' ? 'rgba(245,158,11,0.20)' : 'rgba(239,68,68,0.20)');
+        return `<div class="stat" style="background:${color};">` +
+          `<div class="stat-top">${escapeHtml(String(x.reading_type).toUpperCase())}</div>` +
+          `<div class="stat-mid"><span class="big">${escapeHtml(x.value)}</span> <span class="unit">${escapeHtml(x.reading_type === 'humidity' ? '%' : '°C')}</span></div>` +
+          `<div class="stat-bottom">Status: <b>${escapeHtml(x.status)}</b><div class="muted" style="margin-top:6px;font-weight:800;">${escapeHtml(x.recorded_at || '')}</div></div>` +
+        `</div>`;
+      }).join('');
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  // Chain inventory
+  async function loadInventory(opts = {}) {
+    const productId = opts.productId ? Number(opts.productId) : 0;
+    const url = productId > 0
+      ? `api/inventory.php?product_id=${productId}`
+      : `api/inventory.php`;
+
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+      const out = qs('#inventoryResult');
+      if (!out) return;
+
+      if (!data.ok) throw new Error(data.error || 'Failed');
+
+      const rows = data.inventory && !Array.isArray(data.inventory) ? [data.inventory] : (data.inventory || data);
+
+      // When chain inventory (all shops)
+      if (Array.isArray(data.inventory)) {
+        if (data.inventory.length === 0) {
+          out.innerHTML = '<div class="muted" style="font-weight:900;">No inventory rows.</div>';
+          return;
+        }
+
+        out.innerHTML = data.inventory.slice(0, 24).map((r) => {
+          return `
+            <div class="card" style="margin-bottom:12px;">
+              <div class="muted" style="font-weight:1000;">${escapeHtml(r.region)}</div>
+              <div style="margin-top:6px; font-weight:1000;">Shop: ${escapeHtml(r.shop)}</div>
+              <div class="muted" style="margin-top:6px; font-weight:900;">${escapeHtml(r.product)} (${escapeHtml(r.category)})</div>
+              <div style="margin-top:8px; font-weight:1000;">Qty: <span class="mono">${escapeHtml(r.qty)}</span></div>
+              <div class="muted" style="margin-top:6px; font-weight:800;">Updated: ${escapeHtml(r.updated_at || '')}</div>
+            </div>
+          `;
+        }).join('');
+        return;
+      }
+
+      // For single inventory
+      out.innerHTML = `<div class="muted" style="font-weight:900;">Inventory loaded.</div>`;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  // UI actions
+
+
+  // Manual refresh in hero (if older UI exists)
+  qs('[data-action="refreshIot"]')?.addEventListener('click', async () => {
+    await loadIotEvidence();
+  });
+
+  // Quick token buttons in hero (new UI)
+  qsa('[data-token]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      if (qrInput) qrInput.value = btn.getAttribute('data-token') || '';
+      verifyQr();
+      location.hash = '#qr';
+    });
+  });
+
+  // Inventory upsert wiring
+  const productSelect = qs('#productSelect');
+  const qtyInput = qs('#qtyInput');
+  const upsertBtn = qs('#upsertBtn');
+  const upsertResult = qs('#upsertResult');
+
+  async function loadInventoryUpsertUI() {
+    if (!productSelect) return;
+    productSelect.innerHTML = '<option value="">Loading products...</option>';
+
+    try {
+      const res = await fetch('api/products.php');
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error || 'Failed');
+
+      const products = data.products || [];
+      productSelect.innerHTML = '<option value="">Select product</option>' + products
+        .map((p) => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.name)} (${escapeHtml(p.sku)})</option>`)
+        .join('');
+    } catch (e) {
+      productSelect.innerHTML = '<option value="">Error loading products</option>';
+      console.error(e);
+    }
+  }
+
+  async function upsertInventory() {
+    if (!productSelect || !qtyInput) return;
+
+    const productId = Number(productSelect.value);
+    const qty = Number(qtyInput.value);
+
+    if (!productId || productId <= 0) {
+      upsertResult && (upsertResult.innerHTML = '<b>Error:</b> Select a product.');
+      return;
+    }
+
+    if (Number.isNaN(qty) || qty < 0) {
+      upsertResult && (upsertResult.innerHTML = '<b>Error:</b> Quantity must be 0 or more.');
+      return;
+    }
+
+    upsertResult && (upsertResult.innerHTML = 'Updating...');
+
+    try {
+      const form = new FormData();
+      form.append('product_id', String(productId));
+      form.append('qty', String(qty));
+
+      const res = await fetch('api/inventory_upsert.php', {
+        method: 'POST',
+        body: form,
+      });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error || 'Failed');
+
+      const inv = data.inventory;
+      upsertResult && (upsertResult.innerHTML = `
+        <div style="font-weight:900; margin-bottom:8px;">✅ Inventory updated</div>
+        <div class="muted" style="font-weight:900;">Product: <b>${escapeHtml(inv.product || '')}</b></div>
+        <div class="muted" style="font-weight:900;">Qty: <span class="mono">${escapeHtml(inv.qty)}</span></div>
+        <div class="muted" style="font-weight:900;">Updated: ${escapeHtml(inv.updated_at || '')}</div>
+      `);
+
+    } catch (e) {
+      upsertResult && (upsertResult.innerHTML = '<b>Error:</b> ' + escapeHtml(e.message || 'Failed'));
+      console.error(e);
+    }
+  }
+
+  upsertBtn?.addEventListener('click', upsertInventory);
+
+  // Init
+  fetchProducts();
+  loadInventory();
+  loadInventoryUpsertUI();
+})();
+
+
+

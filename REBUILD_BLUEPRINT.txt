@@ -1,0 +1,5 @@
+﻿SafeFlock Solution - Complete Rebuild Blueprint
+
+Full blueprint: REBUILD_BLUEPRINT.md
+- Architecture, DB schema, APIs, pages, auth/RBAC/CSRF, OTP, WebAuthn, QR, IoT, dispatch, returns, UI, PWA, security, rebuild plan, checklist
+

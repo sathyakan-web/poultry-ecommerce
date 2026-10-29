@@ -1,0 +1,13 @@
+DirectoryIndex index.php index.html
+
+<IfModule mime_module>
+  AddType application/json .json
+  AddType application/manifest+json .json
+</IfModule>
+
+<IfModule rewrite_module>
+  RewriteEngine On
+  RewriteRule ^favicon\.ico$ images/sfs_icon.png [L]
+  RewriteRule ^index\.php$ / [R=301,L]
+  RewriteRule ^manifest\.json$ manifest.php [L]
+</IfModule>

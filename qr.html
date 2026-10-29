@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>SafeFlock Solution - Verify QR</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #323232;
+      --paper-front: #fff9e6;
+      --paper-back: #e6f0ff;
+      --bg-color: #f4f4f4;
+      --app-bg: #ffffff;
+      --primary-btn: #ff6b6b;
+      --primary-btn-hover: #ff5252;
+      --secondary-btn: #4ecdc4;
+      --secondary-btn-hover: #3bbfb6;
+      --switch-bg: #ffe66d;
+      --input-focus: #2d8cf0;
+
+      --text-main: #323232;
+      --text-muted: #666666;
+      --card-bg: #fffdf5;
+
+      --border-width: 2px;
+      --shadow-offset: 4px;
+
+      --sketch-radius-1: 8px 24px 8px 24px / 24px 8px 24px 8px;
+      --sketch-radius-2: 24px 8px 24px 8px / 8px 24px 8px 24px;
+      --sketch-radius-btn: 16px 5px 16px 5px / 5px 16px 5px 16px;
+    }
+
+    body.doodle-dark {
+      --ink: #f0f0f0;
+      --app-bg: #121212;
+      --bg-color: #0a0a0a;
+      --card-bg: #1a1a1a;
+      --text-main: #e0e0e0;
+      --text-muted: #a0a0a0;
+      --primary-btn: #ffd166;
+      --primary-btn-hover: #ffc233;
+      --secondary-btn: #06d6a0;
+      --secondary-btn-hover: #05b586;
+      --switch-bg: #444;
+    }
+
+    body {
+      font-family: "Comic Sans MS", "Chalkboard SE", "Marker Felt", "Gochi Hand", sans-serif;
+      background-color: var(--bg-color);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .mobile-app-container {
+      width: 100%;
+      max-width: 400px;
+      min-height: 100vh;
+      background-color: var(--app-bg);
+      color: var(--text-main);
+      padding: 15px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      position: relative;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+      transition: background-color 0.3s, color 0.3s;
+      overflow-x: hidden;
+      padding-bottom: 100px;
+      margin: 0 auto;
+    }
+
+    .doodle-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 5px;
+    }
+
+    .brand-title {
+      font-size: 18px;
+      font-weight: 900;
+      color: var(--primary-btn);
+      margin: 0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transform: rotate(-2deg);
+      text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
+    }
+
+    .view-section {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .doodle-card {
+      background-color: var(--card-bg);
+      border: var(--border-width) solid var(--ink);
+      border-radius: var(--sketch-radius-2);
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 3px 3px 0px var(--ink);
+      background-image: repeating-linear-gradient(
+        transparent, transparent 20px,
+        rgba(128, 128, 128, 0.05) 20px, rgba(128, 128, 128, 0.05) 21px
+      );
+    }
+
+    .doodle-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 12px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: bold;
+      color: var(--ink);
+      background-color: var(--secondary-btn);
+      border: var(--border-width) solid var(--ink);
+      border-radius: var(--sketch-radius-btn);
+      box-shadow: 3px 3px 0px var(--ink);
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.15s ease;
+    }
+
+    .doodle-btn-outline {
+      background-color: transparent;
+      color: var(--text-main);
+      box-shadow: 2px 2px 0px var(--ink);
+    }
+
+    .doodle-btn:active {
+      transform: translate(2px, 2px);
+      box-shadow: 0px 0px 0px var(--ink);
+    }
+
+    .code-block {
+      background-color: var(--bg-color);
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--ink);
+      font-family: monospace;
+      font-size: 12px;
+      color: var(--text-main);
+      margin-top: 5px;
+    }
+
+    .camera-list {
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      padding-left: 15px;
+      margin: 0;
+    }
+
+    .mobile-dock {
+      position: fixed;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 24px);
+      max-width: 100%;
+      height: 60px;
+      z-index: 100;
+      display: flex !important;
+      justify-content: center;
+      padding: 0 8px;
+    }
+
+    .mobile-dock .dock-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background: var(--app-bg);
+      border: var(--border-width) solid var(--ink);
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      scroll-snap-type: x proximity;
+      scroll-behavior: smooth;
+      box-shadow: 4px 4px 0px var(--ink);
+      padding: 0 8px;
+      gap: 8px;
+    }
+
+    .mobile-dock .dock-inner::-webkit-scrollbar {
+      display: none;
+    }
+
+    #mobile-dock-pill {
+      position: absolute;
+      top: 4px;
+      bottom: 4px;
+      left: 0;
+      background: var(--paper-front);
+      border: var(--border-width) solid var(--ink);
+      border-radius: 9999px;
+      transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), width 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+      z-index: 0;
+      pointer-events: none;
+      box-shadow: 2px 2px 0px var(--ink);
+      will-change: transform, width;
+    }
+
+    .mobile-dock .dock-btn {
+      position: relative;
+      z-index: 10;
+      flex: 0 0 auto;
+      min-width: 56px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      color: var(--text-muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: 0.05em;
+      transition: color 0.3s ease;
+      text-decoration: none;
+      padding: 0 10px;
+      font-family: inherit;
+      text-transform: capitalize;
+      white-space: nowrap;
+      scroll-snap-align: start;
+    }
+
+    .mobile-dock .dock-btn i {
+      font-size: 14px;
+      transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .mobile-dock .dock-btn.active {
+      color: var(--text-main);
+    }
+
+    .mobile-dock .dock-btn.active i {
+      transform: translateY(-2px) scale(1.1);
+      color: var(--primary-btn);
+    }
+
+    .mobile-dock .dock-btn-logout {
+      color: #f87171;
+    }
+
+    .mobile-dock .dock-btn-logout i {
+      color: #f87171;
+    }
+
+    #camera-scanner-view video,
+    #camera-scanner-view canvas {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover;
+      border-radius: var(--sketch-radius-2);
+    }
+
+    .scan-frame {
+      width: min(78%, 260px);
+      aspect-ratio: 1/1;
+      border-radius: 18px;
+      border: var(--border-width) solid var(--ink);
+      box-shadow: 0 0 0 1px rgba(128,128,128,0.12) inset, 0 0 20px rgba(128,128,128,0.08);
+      position: relative;
+      overflow: hidden;
+      background: var(--bg-color);
+    }
+
+    .scan-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, rgba(128,128,128,0), var(--primary-btn), rgba(128,128,128,0));
+      top: 0;
+      box-shadow: 0 0 18px rgba(128,128,128,0.45);
+      animation: lineMove 1.25s cubic-bezier(.2,.8,.2,1) infinite;
+      opacity: .95;
+    }
+
+    @keyframes lineMove {
+      0% { transform: translateY(-10%); opacity: .10; }
+      15% { opacity: .95; }
+      55% { opacity: .95; }
+      100% { transform: translateY(480%); opacity: .10; }
+    }
+
+    .status-box {
+      border-radius: var(--sketch-radius-2);
+      border: var(--border-width) solid var(--ink);
+      background: var(--bg-color);
+      padding: 14px;
+    }
+
+    .token-pill {
+      margin-top: 10px;
+      display: block;
+      padding: 10px 12px;
+      border-radius: var(--sketch-radius-2);
+      border: var(--border-width) solid var(--ink);
+      background: var(--bg-color);
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      z-index: 999;
+    }
+
+    .modal-backdrop.show { display: flex; }
+
+    .modal {
+      width: min(560px, 100%);
+      border-radius: var(--sketch-radius-1);
+      border: var(--border-width) solid var(--ink);
+      background: var(--card-bg);
+      box-shadow: 6px 6px 0px var(--ink);
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+
+    .modal-inner { padding: 16px; }
+    .modal-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .modal-title { font-weight: 1000; font-size: 18px; }
+    .modal-body { margin-top: 10px; color: var(--text-muted); line-height: 1.5; font-size: 14px; }
+    .modal-actions { margin-top: 14px; display: flex; gap: 12px; flex-wrap: wrap; }
+
+    .close-x {
+      width: 38px; height: 38px;
+      border-radius: 12px;
+      border: var(--border-width) solid var(--ink);
+      background: var(--bg-color);
+      display: grid; place-items: center;
+      cursor: pointer;
+      transition: transform .12s ease, background .12s ease;
+      color: var(--text-main);
+      font-weight: 900;
+    }
+
+    .close-x:hover { transform: translateY(-1px); background: var(--paper-front); }
+
+    .flash {
+      position: fixed;
+      inset: -10px;
+      background: radial-gradient(circle at 50% 40%, rgba(128,128,128,.25), rgba(128,128,128,.08) 35%, transparent 60%), rgba(0,0,0,.08);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 998;
+    }
+
+    .flash.show {
+      animation: flashIn .55s ease both;
+    }
+
+    @keyframes flashIn {
+      0% { opacity: 0; transform: scale(1.01); }
+      25% { opacity: 1; }
+      100% { opacity: 0; transform: scale(1.0); }
+    }
+
+    .spinner {
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      border: 2px solid rgba(128,128,128,.18);
+      border-top-color: var(--secondary-btn);
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .btn-link {
+      background: var(--bg-color);
+      border-color: var(--ink);
+      color: var(--text-main);
+    }
+
+    .small-note {
+      margin-top: 10px;
+      color: var(--text-muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      word-break: break-all;
+    }
+
+    .kbd {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 12px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: var(--border-width) solid var(--ink);
+      background: var(--card-bg);
+      color: var(--text-main);
+    }
+  </style>
+</head>
+<body>
+  <div class="mobile-app-container">
+    <header class="doodle-header">
+      <h1 class="brand-title">SafeFlock Solution</h1>
+    </header>
+
+    <div id="view-qr" class="view-section">
+      <article class="doodle-card" style="background-color: rgba(78, 205, 196, 0.05); border-color: var(--secondary-btn);">
+        <h2 style="margin: 0 0 8px 0; font-size: 20px; color: var(--text-main);">Verify by QR Code</h2>
+        <p style="margin: 0 0 12px 0; font-size: 12px; line-height: 1.4; color: var(--text-muted);">Point your camera at the QR code. The feed will freeze once detected, and we'll verify the token.</p>
+
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px;">
+          <button id="btnStart" class="doodle-btn" style="font-size: 11px; color: var(--app-bg); background-color: var(--secondary-btn); border-color: var(--secondary-btn);">Start Scanning</button>
+          <button id="btnStop" class="doodle-btn doodle-btn-outline" style="font-size: 11px; opacity: 0.7;" disabled>Stop Scanning</button>
+          <button id="btnSwitch" class="doodle-btn doodle-btn-outline" style="font-size: 11px;" disabled>Switch Camera</button>
+        </div>
+
+        <div style="background-color: var(--bg-color); border-radius: var(--sketch-radius-2); padding: 10px; border: var(--border-width) solid var(--ink);">
+          <h3 style="margin: 0 0 4px 0; font-size: 13px; color: var(--text-main);">Status</h3>
+          <p id="statusText" style="margin: 0; font-size: 12px; color: var(--text-muted);">Idle. Tap <span style="background: var(--card-bg); padding: 2px 5px; border-radius: 8px; border: var(--border-width) solid var(--ink); font-size: 10px; color: var(--text-main);">Start Scanning</span> to begin.</p>
+        </div>
+
+        <div id="camera-scanner-view"></div>
+      </article>
+
+      <article class="doodle-card">
+        <h2 style="margin: 0 0 8px 0; font-size: 18px; color: var(--text-main);">Verification</h2>
+        <p style="margin: 0 0 12px 0; font-size: 12px; line-height: 1.4; color: var(--text-muted);">Token extraction is based on URL query parameter <span style="background: var(--bg-color); padding: 2px 4px; border: var(--border-width) solid var(--ink); border-radius: 4px; font-family: monospace; color: var(--text-main);">token</span>.</p>
+
+        <div style="margin-bottom: 12px;">
+          <h3 style="margin: 0 0 4px 0; font-size: 13px; color: var(--text-main);">Extracted token</h3>
+          <div class="code-block" id="tokenText">—</div>
+        </div>
+
+        <div>
+          <h3 style="margin: 0 0 4px 0; font-size: 13px; color: var(--text-main);">Available cameras</h3>
+          <ul class="camera-list" id="cameraList">
+            <li>OnePlus Nord CE 3 Lite 5G</li>
+            <li>Integrated Camera</li>
+            <li>OBS Virtual Camera</li>
+          </ul>
+        </div>
+      </article>
+    </div>
+
+    <nav class="mobile-dock" aria-label="Mobile navigation">
+      <div class="dock-inner">
+        <div id="mobile-dock-pill"></div>
+        <a href="index.php" class="dock-btn" data-page="home"><i class="fa-solid fa-house"></i><span>Home</span></a>
+        <a href="products.php" class="dock-btn active" data-page="shop"><i class="fa-solid fa-pills"></i><span>Shop</span></a>
+        <a href="orders.php" class="dock-btn" data-page="orders"><i class="fa-solid fa-box-open"></i><span>Orders</span></a>
+        <a href="qr.php" class="dock-btn" data-page="verify"><i class="fa-solid fa-qrcode"></i><span>Verify QR</span></a>
+        <a href="settings.php" class="dock-btn" data-page="settings"><i class="fa-solid fa-gear"></i><span>Settings</span></a>
+        <a href="auth/logout.php" class="dock-btn dock-btn-logout" data-page="logout"><i class="fa-solid fa-arrow-right-from-bracket"></i><span>Logout</span></a>
+      </div>
+    </nav>
+  </div>
+
+  <div class="flash" id="flash"></div>
+
+  <div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+      <div class="modal-inner">
+        <div class="modal-head">
+          <div class="modal-title" id="modalTitle">QR Code Detected</div>
+          <div class="close-x" id="modalClose" aria-label="Close">✕</div>
+        </div>
+        <div class="modal-body" id="modalBody">
+          <span class="spinner" id="modalSpinner" aria-hidden="true"></span>
+          Verifying token...
+        </div>
+        <div class="modal-body" id="modalDetail" style="margin-top:12px;">
+          <div class="mono" id="modalToken">—</div>
+          <div class="modal-body" style="margin-top:10px; padding:0; color: var(--text-muted); font-size: 12px;" id="modalDebug"></div>
+        </div>
+
+        <div class="modal-actions" id="modalActions">
+          <button class="btn-link" id="btnVerifyClose" type="button">Continue Scanning</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <script src="js/mobile-dock.js"></script>
+  <script>
+    const statusText = document.getElementById('statusText');
+    const tokenText = document.getElementById('tokenText');
+    const cameraList = document.getElementById('cameraList');
+
+    const btnStart = document.getElementById('btnStart');
+    const btnStop = document.getElementById('btnStop');
+    const btnSwitch = document.getElementById('btnSwitch');
+
+    const modalBackdrop = document.getElementById('modalBackdrop');
+    const modalClose = document.getElementById('modalClose');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalBody = document.getElementById('modalBody');
+    const modalSpinner = document.getElementById('modalSpinner');
+    const modalToken = document.getElementById('modalToken');
+    const modalActions = document.getElementById('modalActions');
+    const btnVerifyClose = document.getElementById('btnVerifyClose');
+
+    const flash = document.getElementById('flash');
+
+    let scanner = null;
+    let currentFacing = 'environment';
+    let active = false;
+    let freezing = false;
+    let lastToken = null;
+    let activeStream = null;
+
+    const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+    function setUIState({starting, stopping, switching}={}){
+      btnStart.disabled = !!starting;
+      btnStop.disabled = !stopping;
+      btnSwitch.disabled = !switching;
+    }
+
+    function showFlash(){
+      flash.classList.remove('show');
+      void flash.offsetWidth;
+      flash.classList.add('show');
+    }
+
+    function showModal({title, body, token, showSpinner=true, actions=null}){
+      modalTitle.textContent = title || 'QR Code Detected';
+      modalToken.textContent = token || '—';
+      modalBody.innerHTML = '';
+      if(showSpinner){
+        modalBody.appendChild(modalSpinner);
+      }
+      modalBody.appendChild(document.createTextNode(body || 'Verifying token...'));
+
+      if(actions){
+        modalActions.innerHTML = '';
+        actions.forEach(a => {
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.textContent = a.label;
+          b.className = a.className || 'btn-link';
+          b.addEventListener('click', a.onClick, {once:true});
+          modalActions.appendChild(b);
+        });
+      }else{
+        modalActions.innerHTML = '';
+        modalActions.appendChild(btnVerifyClose);
+        btnVerifyClose.onclick = null;
+        btnVerifyClose.onclick = () => {
+          modalBackdrop.classList.remove('show');
+          setTimeout(() => {
+            freezing = false;
+            if(active && scanner){
+              try{
+                if(typeof scanner.resume === 'function'){
+                  scanner.resume();
+                }else if(typeof scanner.start === 'function'){
+                  scanner.start();
+                }
+              }catch(_e){}
+            }
+          }, 200);
+        };
+      }
+
+      modalBackdrop.classList.add('show');
+    }
+
+    function hideModal(){
+      modalBackdrop.classList.remove('show');
+    }
+
+    modalClose.addEventListener('click', hideModal);
+    btnVerifyClose.addEventListener('click', hideModal);
+
+    function parseTokenFromPayload(payload){
+      const text = payload == null ? '' : String(payload).trim();
+      if(!text) return null;
+
+      const cleaned = text.replace(/^\ufeff/, '');
+
+      try{
+        const u = new URL(cleaned);
+        const t = u.searchParams.get('token');
+        return t ? decodeURIComponent(String(t)) : null;
+      }catch(_e){}
+
+      const m = cleaned.match(/[?&]token=([^&#]+)/i);
+      if(m && m[1]) return decodeURIComponent(m[1]);
+
+      if(cleaned.length >= 3 && !cleaned.includes(' ')) return cleaned;
+
+      return null;
+    }
+
+    async function ensureCameraPermission(){
+      try{
+        const tmp = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+        tmp.getTracks().forEach(t => t.stop());
+        return true;
+      }catch(err){
+        return err;
+      }
+    }
+
+    async function listCameras(){
+      if(!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) return;
+
+      try{
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const cams = devices.filter(d => d.kind === 'videoinput');
+        if(!cams.length){
+          cameraList.textContent = 'No cameras detected.';
+          return;
+        }
+        const lines = cams.map((c, i) => {
+          const label = c.label ? c.label : `Camera ${i+1}`;
+          return `• ${label}`;
+        });
+        cameraList.textContent = lines.join('\n');
+      }catch(_e){
+        // ignore
+      }
+    }
+
+    async function getFacingConstraint(facing){
+      return { facingMode: facing };
+    }
+
+    function stopScanner(){
+      freezing = false;
+      active = false;
+
+      try{
+        if(scanner && typeof scanner.stop === 'function') scanner.stop();
+      }catch(_e){}
+
+      if(activeStream){
+        activeStream.getTracks().forEach(t => t.stop());
+        activeStream = null;
+      }
+
+      scanner = null;
+      setUIState({starting:false, stopping:false, switching:false});
+      statusText.textContent = 'Idle. Tap Start Scanning to begin.';
+    }
+
+    function freezeFeed(){
+      freezing = true;
+      showFlash();
+
+      showModal({
+        title: 'QR Code Detected',
+        body: 'Verifying token...',
+        token: lastToken || '—',
+        showSpinner: true
+      });
+
+      setUIState({starting:false, stopping:false, switching:false});
+    }
+
+    async function postVerifyToken(token){
+      const url = `api/verify_qr.php?token=${encodeURIComponent(token)}`;
+
+      const res = await fetch(url, { method: 'GET' });
+      let data = null;
+      try{ data = await res.json(); }catch(_e){ data = null; }
+
+      if(!res.ok){
+        const msg = (data && (data.error || data.message)) ? (data.error || data.message) : `HTTP ${res.status}`;
+        const t = (data && (data.error || data.message)) ? (data.error || data.message) : '';
+        const e = new Error(msg);
+        e.data = data;
+        const dbg = document.getElementById('modalDebug');
+        if(dbg){
+          dbg.textContent = JSON.stringify({ token, requestUrl: url, httpStatus: res.status, response: data }, null, 2);
+        }
+        throw e;
+      }
+
+      return data;
+    }
+
+    async function handleDecoded(payload){
+      if(!active || freezing) return;
+
+      const token = parseTokenFromPayload(payload);
+      if(!token){
+        statusText.textContent = 'QR detected but token not found in payload.';
+        return;
+      }
+
+      if(token === lastToken){
+        return;
+      }
+
+      lastToken = token;
+      tokenText.textContent = token;
+
+      freezeFeed();
+      try{ if(scanner && typeof scanner.pause === 'function') scanner.pause(); }catch(_e){}
+
+      showFlash();
+
+      try{
+        const data = await postVerifyToken(token);
+        showFlash();
+
+        const ok = !!(data && data.ok);
+
+        modalSpinner.remove();
+        modalTitle.textContent = ok ? '✅ Verified' : '⚠️ Verification failed';
+        modalBody.style.color = ok ? 'rgba(34,197,94,.95)' : 'rgba(239,68,68,.95)';
+
+        modalBody.innerHTML = '';
+
+        const v = data && data.verification ? data.verification : {};
+        const productName = v.product || v.name || '';
+        const productCategory = v.category || '';
+        const sku = v.sku || '';
+        const batchNo = v.batch_no || '';
+        const iotStatus = v.iot_status || '';
+
+        const card = document.createElement('div');
+        card.style.marginTop = '8px';
+        card.style.border = 'var(--border-width) solid var(--ink)';
+        card.style.background = 'var(--bg-color)';
+        card.style.borderRadius = 'var(--sketch-radius-2)';
+        card.style.padding = '12px';
+
+        const img = document.createElement('div');
+        img.style.width = '76px';
+        img.style.height = '76px';
+        img.style.borderRadius = 'var(--sketch-radius-2)';
+        img.style.background = 'var(--card-bg)';
+        img.style.border = 'var(--border-width) solid var(--ink)';
+        img.style.display = 'flex';
+        img.style.alignItems = 'center';
+        img.style.justifyContent = 'center';
+        img.style.overflow = 'hidden';
+
+        const logoPath = v.logo_path || '';
+        if(logoPath){
+          const im = document.createElement('img');
+          im.src = logoPath;
+          im.alt = 'Product image';
+          im.style.width = '100%';
+          im.style.height = '100%';
+          im.style.objectFit = 'cover';
+          im.onerror = () => { im.style.display = 'none'; img.textContent = 'No Image'; };
+          img.appendChild(im);
+        }else{
+          img.textContent = 'No Image';
+          img.style.color = 'var(--text-muted)';
+          img.style.fontWeight = '1000';
+          img.style.fontSize = '12px';
+        }
+
+        const meta = document.createElement('div');
+        meta.style.flex = '1';
+        meta.style.minWidth = '0';
+
+        const nameEl = document.createElement('div');
+        nameEl.style.fontWeight = '1000';
+        nameEl.style.fontSize = '18px';
+        nameEl.style.lineHeight = '1.15';
+        nameEl.textContent = productName ? productName : 'Unknown product';
+
+        const catEl = document.createElement('div');
+        catEl.style.marginTop = '6px';
+        catEl.style.fontWeight = '900';
+        catEl.style.color = 'var(--text-main)';
+        catEl.textContent = (productCategory || '—') + (sku ? (' • ' + sku) : '');
+
+        const metaRow = document.createElement('div');
+        metaRow.style.marginTop = '10px';
+        metaRow.style.color = 'var(--text-main)';
+        metaRow.style.fontSize = '13px';
+
+        metaRow.innerHTML = '';
+        const mk = (label, value) => {
+          const d = document.createElement('div');
+          d.style.marginTop = '6px';
+          d.innerHTML = `<span style="font-weight:900;">${label}:</span> <span style="font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono", "Courier New", monospace;">${value || '—'}</span>`;
+          return d;
+        };
+
+        metaRow.appendChild(mk('Batch', batchNo));
+        metaRow.appendChild(mk('IoT Status', iotStatus));
+
+        const invLine = document.createElement('div');
+        invLine.style.marginTop = '6px';
+        invLine.style.fontSize = '13px';
+        if(data && data.inventory){
+          invLine.innerHTML = `<span style="font-weight:900;">Inventory Qty:</span> <span style="font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono", "Courier New", monospace;">${data.inventory.qty ?? '—'}</span>`;
+        }else{
+          invLine.innerHTML = `<span style="font-weight:900;">Inventory Qty:</span> <span style="font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono", "Courier New", monospace;">—</span>`;
+        }
+        metaRow.appendChild(invLine);
+
+        const updLine = document.createElement('div');
+        updLine.style.marginTop = '6px';
+        updLine.style.fontSize = '13px';
+        const updatedAt = data && data.inventory ? (data.inventory.updated_at || '') : '';
+        updLine.innerHTML = `<span style="font-weight:900;">Updated:</span> <span style="font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono", "Courier New", monospace;">${updatedAt || '—'}</span>`;
+        metaRow.appendChild(updLine);
+
+        const top = document.createElement('div');
+        top.style.display = 'flex';
+        top.style.gap = '12px';
+        top.style.alignItems = 'flex-start';
+        top.style.flexWrap = 'wrap';
+        top.appendChild(img);
+
+        meta.appendChild(nameEl);
+        meta.appendChild(catEl);
+        meta.appendChild(metaRow);
+        top.appendChild(meta);
+
+        card.appendChild(top);
+
+        const msgEl = document.createElement('div');
+        msgEl.style.marginTop = '12px';
+        msgEl.style.color = 'var(--text-main)';
+        msgEl.style.fontSize = '14px';
+        msgEl.textContent = data && (data.message || data.error) ? (data.message || data.error) : 'Verification complete.';
+
+        modalBody.appendChild(card);
+        modalBody.appendChild(msgEl);
+
+        modalToken.textContent = token;
+
+        modalActions.innerHTML = '';
+        const closeBtn = document.createElement('button');
+        closeBtn.type = 'button';
+        closeBtn.textContent = 'Continue Scanning';
+        closeBtn.className = 'btn-link';
+        closeBtn.addEventListener('click', () => {
+          hideModal();
+          setTimeout(() => {
+            freezing = false;
+            lastToken = null;
+            if(active && scanner){
+              try{
+                if(typeof scanner.resume === 'function'){
+                  scanner.resume();
+                }else if(typeof scanner.start === 'function'){
+                  scanner.start();
+                }
+              }catch(_e){}
+            }
+          }, 200);
+        }, {once:true});
+        modalActions.appendChild(closeBtn);
+
+        statusText.textContent = 'Verification completed.';
+
+      }catch(err){
+        modalSpinner.remove();
+        modalTitle.textContent = '⚠️ Verification error';
+        modalBody.style.color = 'rgba(239,68,68,.95)';
+        modalBody.innerHTML = '';
+
+        const errText = document.createTextNode('Could not verify token.');
+        modalBody.appendChild(errText);
+
+        modalToken.textContent = (lastToken || '—') + (err && err.message ? `\n${err.message}` : '');
+
+        modalActions.innerHTML = '';
+        const closeBtn = document.createElement('button');
+        closeBtn.type = 'button';
+        closeBtn.textContent = 'Try Scanning Again';
+        closeBtn.className = 'btn-link';
+        closeBtn.addEventListener('click', () => {
+          hideModal();
+          setTimeout(() => {
+            freezing = false;
+            lastToken = null;
+            if(active && scanner){
+              try{
+                if(typeof scanner.resume === 'function'){
+                  scanner.resume();
+                }else if(typeof scanner.start === 'function'){
+                  scanner.start();
+                }
+              }catch(_e){}
+            }
+          }, 200);
+        }, {once:true});
+        modalActions.appendChild(closeBtn);
+
+        statusText.textContent = 'Verification failed. Please try again.';
+      }
+    }
+
+    function startScanner(){
+      if(!navigator.mediaDevices || !window.Html5QrcodeScanner){
+        statusText.textContent = 'QR scanner library unavailable.';
+        return;
+      }
+
+      if(scanner && typeof scanner.stop === 'function'){
+        try{ scanner.stop(); }catch(_e){}
+      }
+
+      setUIState({starting:true, stopping:false, switching:false});
+
+      const facing = currentFacing;
+      statusText.textContent = `Requesting camera (${facing === 'environment' ? 'back' : 'front'})...`;
+
+      const view = document.getElementById('camera-scanner-view');
+      if(view) view.innerHTML = '';
+
+      const qrbox = Math.max(170, Math.min(260, Math.floor((view ? view.clientWidth : 260) * 0.6 || 220)));
+
+      const constraints = {
+        video: {
+          facingMode: facing
+        }
+      };
+
+      try{
+        scanner = new Html5QrcodeScanner('camera-scanner-view', {
+          qrbox: { width: qrbox, height: qrbox },
+          fps: 12,
+          rememberLastScan: true,
+          mobile: true
+        });
+      }catch(e){
+        scanner = new Html5QrcodeScanner('camera-scanner-view', { qrbox: { width: qrbox, height: qrbox }, fps: 12, rememberLastScan: true });
+      }
+
+      try{
+        scanner.render((decodedText) => handleDecoded(decodedText));
+      }catch(_e){
+        try{
+          scanner.render();
+          scanner.callback = (decodedText) => handleDecoded(decodedText);
+        }catch(_e2){
+          statusText.textContent = 'Failed to start QR decoding callback.';
+        }
+      }
+
+      try{
+        if(typeof scanner.start === 'function') scanner.start();
+      }catch(_e){}
+
+      active = true;
+      freezing = false;
+      lastToken = null;
+      tokenText.textContent = '—';
+
+      setUIState({starting:false, stopping:true, switching:true});
+      statusText.textContent = 'Scanning...';
+
+      ensureCameraPermission().then(async (permRes) => {
+        if(permRes === true) {
+          await listCameras();
+        }
+      }).catch(()=>{});
+
+      navigator.mediaDevices.getUserMedia(constraints).then(stream => {
+        activeStream = stream;
+      }).catch(err => {
+        if(err && (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError')){
+          statusText.textContent = 'Camera access blocked. Allow permission and try again.';
+        }
+      });
+    }
+
+    btnStart.addEventListener('click', async () => {
+      lastToken = null;
+      tokenText.textContent = '—';
+
+      const perm = await ensureCameraPermission();
+      if(perm !== true){
+        const err = perm;
+        const msg = (err && (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError'))
+          ? 'Camera permission blocked. Please enable camera access in browser settings.'
+          : 'Unable to access camera. Please check device and permissions.';
+        statusText.textContent = msg;
+        cameraList.textContent = '—';
+        setUIState({starting:false, stopping:false, switching:false});
+        showModal({
+          title: 'Camera unavailable',
+          body: msg,
+          token: '—',
+          showSpinner: false,
+          actions: [{
+            label: 'Close',
+            className: 'btn-link',
+            onClick: () => hideModal()
+          }]
+        });
+        return;
+      }
+
+      currentFacing = 'environment';
+      await listCameras();
+      startScanner();
+    });
+
+    btnStop.addEventListener('click', () => {
+      stopScanner();
+    });
+
+    btnSwitch.addEventListener('click', async () => {
+      currentFacing = (currentFacing === 'environment') ? 'user' : 'environment';
+      stopScanner();
+      await sleep(150);
+      startScanner();
+    });
+
+    (async () => {
+      try{
+        if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
+          await listCameras();
+        }
+      }catch(_e){}
+    })();
+
+    window.addEventListener('beforeunload', () => {
+      try{ stopScanner(); }catch(_e){}
+    });
+  </script>
+</body>
+</html>

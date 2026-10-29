@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Safe Flock Solutions | Smart Poultry Management & E-commerce</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700;900&family=Gochi+Hand&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#fdfbf7;--ink:#2b2b2b;--card:#fffdf8;--mute:#5b5b5b;--yellow:#ffe66d;--teal:#4ecdc4;--coral:#ff6b6b;--green:#06d6a0;--purple:#9b5de5;--t1:#fff3b0;--t2:#c9f2ee;--t3:#ffd9d9;--t4:#e7dbfb;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--e:cubic-bezier(.7,0,.2,1);--s:cubic-bezier(.2,1.6,.4,1)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#1d2626;--ink:#f6f1e4;--card:#263231;--mute:#b9c4c0;--t1:#4a4220;--t2:#1f4743;--t3:#4d2a2a;--t4:#352a4d}}
+:root[data-theme="dark"]{--paper:#1d2626;--ink:#f6f1e4;--card:#263231;--mute:#b9c4c0;--t1:#4a4220;--t2:#1f4743;--t3:#4d2a2a;--t4:#352a4d}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font:700 18px/1.55 'Comic Neue',system-ui,sans-serif;color:var(--ink);background:var(--paper) radial-gradient(color-mix(in srgb,var(--ink) 9%,transparent) 2px,transparent 2px) 0 0/30px 30px;overflow-x:hidden}
+h1,h2,h3{font-family:'Gochi Hand','Comic Neue',cursive;font-weight:400;margin:0;line-height:1}
+a{color:inherit}:focus-visible{outline:4px dashed var(--purple);outline-offset:4px}
+.wrap{max-width:1140px;margin:0 auto;padding:0 24px}
+@media (pointer:fine){body,a,button,input,[role=button]{cursor:none}}
+.cd,.cr{position:fixed;top:0;left:0;pointer-events:none;z-index:99;border-radius:50%;transform:translate(-50%,-50%)}
+.cd{width:9px;height:9px;background:var(--ink)}.cr{width:40px;height:40px;border:3px solid var(--ink);animation:sq 3s infinite alternate;transition:width .2s,height .2s,background .2s}
+.cr.h{width:66px;height:66px;background:#ffe66d66;border-style:dashed}@media (pointer:coarse){.cd,.cr{display:none}}
+@keyframes sq{0%{border-radius:40% 60% 70% 30%/40% 50% 60% 50%}100%{border-radius:60% 40% 30% 70%/50% 60% 40% 50%}}
+.pg{position:fixed;top:0;left:0;height:7px;width:100%;background:var(--coral);border-bottom:3px solid var(--ink);transform:scaleX(0);transform-origin:left;z-index:60}
+nav{position:fixed;top:calc(18px + env(safe-area-inset-top,0px));left:50%;transform:translate(-50%,-110px);z-index:40;display:flex;align-items:center;gap:26px;padding:8px 10px 8px 20px;background:var(--paper);border:3px solid var(--ink);border-radius:40px;box-shadow:5px 5px 0 var(--ink);animation:nin .8s .2s var(--s) forwards;width:max-content;max-width:calc(100% - 24px)}
+@keyframes nin{to{transform:translate(-50%,0)}}
+.brand{font:400 26px 'Gochi Hand';text-decoration:none;display:flex;gap:8px;align-items:center;white-space:nowrap}.brand img{width:90px;height:44px;animation:wig 2.4s infinite}
+@keyframes wig{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(8deg) translateY(-3px)}}
+nav .l{display:flex;gap:20px}nav .l a{text-decoration:none;position:relative}
+nav .l a::after{content:"";position:absolute;left:0;bottom:-3px;height:4px;width:100%;background:var(--coral);border-radius:4px;transform:scaleX(0);transform-origin:left;transition:transform .3s var(--e)}nav .l a:hover::after{transform:scaleX(1)}
+.btn{display:inline-flex;align-items:center;gap:8px;font:900 18px 'Comic Neue';padding:14px 28px;border:3px solid var(--ink);border-radius:12px 18px 12px 18px/18px 12px 18px 12px;background:var(--yellow);color:#2b2b2b;box-shadow:5px 5px 0 var(--ink);text-decoration:none;transition:transform .12s,box-shadow .12s;cursor:pointer}
+.btn:hover{transform:translate(-2px,-2px) rotate(-2deg);box-shadow:8px 8px 0 var(--ink)}.btn:active{transform:translate(4px,4px);box-shadow:0 0 0 var(--ink)}
+.btn.t{background:var(--teal)}.btn.s{padding:8px 18px;box-shadow:3px 3px 0 var(--ink);border-radius:30px}
+.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:20px;align-items:center;min-height:100svh;padding:110px 0 40px}
+h1{font-size:clamp(54px,8.4vw,116px)}
+.ln{display:block;overflow:hidden;padding:0 .1em .14em 0}.ln i{display:block;font-style:normal;text-shadow:4px 4px 0 var(--yellow);transform:translateY(115%) rotate(4deg);animation:up 1s var(--e) forwards}
+.ln:nth-child(2) i{animation-delay:.12s;text-shadow:4px 4px 0 var(--teal)}.ln:nth-child(3) i{animation-delay:.24s;text-shadow:4px 4px 0 var(--coral)}
+@keyframes up{to{transform:none}}
+.lead{color:var(--mute);font-size:21px;max-width:42ch;margin:24px 0 30px;opacity:0;transform:translateY(20px);animation:fi .8s .7s var(--e) forwards}
+.cta{display:flex;gap:16px;flex-wrap:wrap;opacity:0;transform:translateY(20px);animation:fi .8s .85s var(--e) forwards}
+@keyframes fi{to{opacity:1;transform:none}}
+.cl{position:relative;aspect-ratio:1;max-width:500px;width:100%;margin:0 auto;--mx:0;--my:0}
+.tile{position:absolute;background:var(--card);border:4px solid var(--ink);border-radius:8px 24px 8px 24px/24px 8px 24px 8px;box-shadow:8px 8px 0 var(--ink);display:grid;place-items:center;opacity:0;transform:scale(.3) translateY(80px) rotate(var(--r));animation:tin .9s var(--s) forwards;translate:calc(var(--mx)*var(--p)*1px) calc(var(--my)*var(--p)*1px);transition:translate .3s ease-out}
+.tile>svg{width:60%;height:60%;filter:url(#boil);animation:bob 3.6s var(--d,0s) ease-in-out infinite}
+@keyframes tin{to{opacity:1;transform:rotate(var(--r2,0deg))}}@keyframes bob{50%{transform:translateY(-10px) rotate(3deg)}}
+.t1{left:22%;top:10%;width:48%;height:58%;--r:-6deg;--r2:-2deg;--p:14;animation-delay:.5s;background:var(--t1)}
+.t2{left:0;top:48%;width:34%;height:34%;--r:8deg;--r2:3deg;--p:-22;animation-delay:.7s;background:var(--t2)}
+.t3{right:0;top:26%;width:34%;height:30%;--r:-9deg;--r2:-3deg;--p:26;animation-delay:.85s;background:var(--t3)}
+.t4{right:10%;bottom:0;width:42%;height:30%;--r:7deg;--r2:2deg;--p:-16;animation-delay:1s;background:var(--t4);cursor:pointer}
+.chip{position:absolute;left:0;top:14%;background:var(--yellow);color:#2b2b2b;font:400 24px 'Gochi Hand';padding:6px 16px;border:3px solid var(--ink);border-radius:30px;box-shadow:4px 4px 0 var(--ink);opacity:0;animation:chip 1s 1.5s var(--s) forwards;z-index:3;rotate:-6deg}
+@keyframes chip{from{opacity:0;transform:translateX(-40px) scale(.5)}to{opacity:1;transform:none}}
+.bub{position:absolute;background:#fff;color:#2b2b2b;border:3px solid #2b2b2b;border-radius:18px;padding:2px 14px;font:400 24px 'Gochi Hand';pointer-events:none;animation:bub 1.1s forwards;z-index:5}
+@keyframes bub{0%{transform:scale(0) rotate(-12deg)}20%{transform:scale(1.2) rotate(4deg)}80%{opacity:1}100%{transform:translateY(-50px);opacity:0}}
+.band{overflow:hidden;white-space:nowrap;border-block:4px solid var(--ink);background:var(--teal);color:#2b2b2b;padding:10px 0;margin:30px -20px;transform:rotate(-1.5deg)}
+.band div{display:inline-flex;gap:44px;padding-right:44px;font:400 36px 'Gochi Hand';animation:mq 24s linear infinite}.band:hover div{animation-play-state:paused}
+@keyframes mq{to{transform:translateX(-50%)}}
+.pin{height:520vh;position:relative}
+.sticky{position:sticky;top:0;height:100svh;display:grid;grid-template-columns:.8fr 1.2fr;gap:48px;align-items:center;padding-top:70px}
+.fh{font-size:clamp(40px,5vw,68px);margin-bottom:30px;text-shadow:3px 3px 0 var(--teal)}
+.fl{list-style:none;margin:0;padding:0 0 0 28px;position:relative}
+.fl::before{content:"";position:absolute;left:0;top:6px;bottom:6px;border-left:5px dashed var(--ink);opacity:.3}
+.fl::after{content:"";position:absolute;left:-2px;top:6px;bottom:6px;width:9px;background:var(--coral);border:2px solid var(--ink);border-radius:6px;transform:scaleY(var(--p,0));transform-origin:top;transition:transform .6s var(--e)}
+.fl li{padding:8px 0;color:var(--mute);transition:color .4s}.fl li h3{font-size:34px;transition:transform .5s var(--s)}
+.fl li p{margin:0;max-height:0;overflow:hidden;opacity:0;transition:max-height .6s var(--e),opacity .5s,margin .5s}
+.fl li.on{color:var(--ink)}.fl li.on h3{transform:translateX(10px) rotate(-2deg)}.fl li.on p{max-height:100px;opacity:1;margin-top:6px;color:var(--mute)}
+.stage{position:relative;height:min(560px,68svh);border:4px solid var(--ink);border-radius:8px 28px 8px 28px/28px 8px 28px 8px;overflow:hidden;box-shadow:10px 10px 0 var(--ink);background:var(--card)}
+.tape{position:absolute;top:-4px;left:50%;width:110px;height:30px;margin-left:-55px;border:2px dashed #0006;background:#ffe66dcc;z-index:10;rotate:-3deg;mix-blend-mode:multiply}
+.pn{position:absolute;inset:0;clip-path:circle(0% at 82% 88%);transition:clip-path 1s var(--e);display:flex;flex-direction:column;justify-content:center;gap:18px;padding:clamp(22px,4vw,54px)}
+.pn:nth-of-type(1){background:var(--t1);z-index:1;clip-path:circle(0% at 50% 50%)}.pn:nth-of-type(2){background:var(--t2);z-index:2}.pn:nth-of-type(3){background:var(--t3);z-index:3}.pn:nth-of-type(4){background:var(--t4);z-index:4}
+.pn.on{clip-path:circle(150% at 82% 88%)}.pn:nth-of-type(1).on{clip-path:circle(150% at 50% 50%)}
+.pn>*{opacity:0;transform:translateY(40px) rotate(2deg);transition:opacity .6s,transform .8s var(--s)}
+.pn.on>*{opacity:1;transform:none;transition-delay:calc(.3s + var(--i,0)*.1s)}
+.k{font:400 28px 'Gochi Hand'}
+.ir{display:grid;grid-template-columns:38px 1fr auto;gap:14px;align-items:center}.ir svg{width:38px;height:38px}
+.bar{height:16px;border:3px solid var(--ink);border-radius:10px;overflow:hidden;background:var(--card);margin-top:4px}
+.bar u{display:block;width:0;height:100%;background-color:var(--green);background-image:repeating-linear-gradient(45deg,#fff4 0 8px,transparent 8px 16px);transition:width 1.4s .5s var(--s);animation:stripe 1s linear infinite}
+.bar u.lo{background-color:var(--coral)}.pn:not(.on) .bar u{width:0!important;transition:none}
+@keyframes stripe{to{background-position:16px 0}}
+.ir em{font-style:normal;font-weight:900;font-variant-numeric:tabular-nums}
+.big{font:400 clamp(80px,13vw,150px)/.9 'Gochi Hand';color:var(--ink);text-shadow:5px 5px 0 var(--purple)}
+input[type=range]{width:100%;accent-color:var(--coral);height:30px}
+.dots{display:flex;gap:16px}.dots i{width:28px;height:28px;border-radius:50%;border:3px solid var(--ink);transition:transform .25s var(--s),background .2s}.dots i.on{background:var(--coral);transform:scale(1.25) rotate(20deg)}
+.keys{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;max-width:420px}.keys b{background:var(--card);border:3px solid var(--ink);border-radius:12px;text-align:center;padding:6px 0;transition:transform .15s,background .15s}.keys b.h{background:var(--yellow);color:#2b2b2b;transform:translate(2px,2px) scale(.88)}
+.ok{font:400 30px 'Gochi Hand';min-height:36px;transition:color .3s}.ok.y{color:#0a8f6a}
+.qs{position:relative;width:min(220px,50%);aspect-ratio:100/120}.qs svg{width:100%;height:100%;filter:url(#boil)}
+.qs .bm{position:absolute;left:-12%;right:-12%;top:10%;height:5px;border-radius:5px;background:var(--coral);box-shadow:0 0 18px 4px var(--coral);animation:bm 2s ease-in-out infinite alternate}@keyframes bm{to{top:88%}}
+.rv{opacity:0;transform:translateY(60px) rotate(-2deg);transition:opacity .7s,transform 1s var(--s)}.rv.in{opacity:1;transform:none}
+.steps{padding:100px 0 50px}.steps h2{font-size:clamp(46px,7vw,92px);max-width:12ch;margin-bottom:50px;text-shadow:4px 4px 0 var(--yellow)}
+.row{display:grid;grid-template-columns:repeat(4,1fr);gap:26px}
+.st{background:var(--card);border:4px solid var(--ink);border-radius:8px 24px 8px 24px/24px 8px 24px 8px;box-shadow:7px 7px 0 var(--ink);padding:24px;clip-path:inset(-10px -14px 100% -10px);transition:clip-path .9s var(--e),transform .3s var(--s)}
+.st:nth-child(even){border-radius:24px 8px 24px 8px/8px 24px 8px 24px}.st.in{clip-path:inset(-10px -14px -14px -10px)}.st:hover{transform:translateY(-8px) rotate(-2deg)}
+.st svg{width:56px;height:56px;filter:url(#boil)}.st h3{font-size:36px;margin:12px 0 4px}.st p{margin:0;color:var(--mute);font-size:16px}
+.fin{margin:50px 0 40px;background:var(--coral);color:#2b2b2b;border:4px solid var(--ink);border-radius:30px 10px 30px 10px/10px 30px 10px 30px;box-shadow:10px 10px 0 var(--ink);padding:clamp(44px,8vw,100px) 24px;text-align:center;position:relative;overflow:hidden}
+.fin h2{font-size:clamp(46px,7vw,96px);max-width:14ch;margin:0 auto 14px;text-shadow:3px 3px 0 #fff9}.fin p{max-width:44ch;margin:0 auto 30px;font-size:20px}
+.fin .o{position:absolute;border-radius:50%;border:4px dashed #2b2b2b44;animation:ring 6s infinite;left:50%;top:50%;width:200px;height:200px;margin:-100px}
+@keyframes ring{from{transform:scale(.4);opacity:1}to{transform:scale(5);opacity:0}}
+.fin .btn{position:relative;font-size:22px;transition:transform .2s ease-out,box-shadow .12s}
+.egr{position:fixed;top:-60px;width:30px;z-index:70;pointer-events:none;animation:rain 2.2s ease-in forwards}@keyframes rain{to{transform:translateY(112vh) rotate(var(--rot))}}
+footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;color:var(--mute);padding:10px 0 50px}
+@media (max-width:860px){.hero{grid-template-columns:1fr;padding-top:100px;min-height:0}nav .l{display:none}nav{gap:14px}
+.sticky{grid-template-columns:1fr;gap:14px;padding-top:84px;align-content:center}.fh{margin-bottom:10px}.fl li:not(.on){display:none}.fl::before,.fl::after{display:none}.fl{padding:0}.stage{height:58svh}.row{grid-template-columns:1fr 1fr}}
+@media (max-width:480px){.row{grid-template-columns:1fr}.brand{font-size:19px}.brand img{width:70px;height:36px}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}.ln i,.lead,.cta,.tile,.chip{opacity:1;transform:none}nav{transform:translate(-50%,0)}.rv{opacity:1;transform:none}.st{clip-path:none}}
+</style>
+</head>
+<body>
+<div class="cd" id="cd"></div><div class="cr" id="cr"></div><div class="pg" id="pg"></div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<filter id="boil"><feTurbulence id="tb" type="fractalNoise" baseFrequency=".03" numOctaves="2" seed="1"/><feDisplacementMap in="SourceGraphic" scale="4"/></filter>
+<symbol id="egg" viewBox="0 0 200 260"><path d="M100 10C150 10 185 100 185 160c0 55-37 90-85 90S15 215 15 160C15 100 50 10 100 10Z" fill="#fff" stroke="#2b2b2b" stroke-width="8" stroke-linejoin="round"/></symbol>
+<symbol id="vI" viewBox="0 0 60 100"><rect x="16" y="4" width="28" height="16" rx="4" fill="#ff6b6b" stroke="#2b2b2b" stroke-width="4"/><path d="M12 20h36v64a10 10 0 0 1-10 10H22a10 10 0 0 1-10-10Z" fill="#fff" stroke="#2b2b2b" stroke-width="5"/><path d="M14 56h32v28a8 8 0 0 1-8 8H22a8 8 0 0 1-8-8Z" fill="#4ecdc4"/><path d="M30 64v18M21 73h18" stroke="#fff" stroke-width="4" stroke-linecap="round"/></symbol>
+<symbol id="pI" viewBox="0 0 100 120"><path d="M10 14h80l-6 96H16Z" fill="#ffe66d" stroke="#2b2b2b" stroke-width="5" stroke-linejoin="round"/><path d="M10 26h80M10 98h80" stroke="#2b2b2b" stroke-width="3" stroke-dasharray="4 4"/><circle cx="50" cy="62" r="20" fill="#fff" stroke="#2b2b2b" stroke-width="4"/><path d="M50 51v22M39 62h22" stroke="#ff6b6b" stroke-width="7" stroke-linecap="round"/></symbol>
+<symbol id="hI" viewBox="0 0 140 130"><path d="M20 70c0-30 22-48 50-48 20 0 30 10 36 22 10 2 24 10 24 28 0 28-30 44-60 44S20 100 20 70Z" fill="#fff" stroke="#2b2b2b" stroke-width="6"/><path d="M26 74c14 4 28 2 40-8 6 14-2 36-24 36-12-6-18-16-16-28Z" fill="#f4f6f8" stroke="#2b2b2b" stroke-width="4"/><path d="M72 22c-2-12 6-18 12-14 4-8 14-2 12 8Z" fill="#ff6b6b" stroke="#2b2b2b" stroke-width="4" stroke-linejoin="round"/><path d="M100 44l16 6-16 8Z" fill="#ffe66d" stroke="#2b2b2b" stroke-width="3" stroke-linejoin="round"/><circle cx="88" cy="40" r="4" fill="#2b2b2b"/><path d="M60 122v8M84 122v8" stroke="#2b2b2b" stroke-width="6" stroke-linecap="round"/></symbol>
+<symbol id="star" viewBox="0 0 24 24"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7Z" fill="#ffe66d" stroke="#2b2b2b" stroke-width="2" stroke-linejoin="round"/></symbol>
+<symbol id="heart" viewBox="0 0 24 24"><path d="M12 21C4 14 2 10 2 7a5 5 0 0 1 10-1 5 5 0 0 1 10 1c0 3-2 7-10 14Z" fill="#ff6b6b" stroke="#2b2b2b" stroke-width="2" stroke-linejoin="round"/></symbol>
+</defs></svg>
+
+<nav aria-label="Main"><a class="brand" href="#top"><img src="logo-safe-flock-solutions.png" alt="Safe Flock Solutions logo">Safe Flock Solutions</a>
+<div class="l"><a href="#features">Features</a><a href="#how">How it works</a></div><a class="btn s" href="logistics_dashboard_spa.php">Get started</a></nav>
+
+<main id="top"><div class="wrap">
+<section class="hero">
+ <div><h1 aria-label="Happy flocks, safe medicine, pouch to egg."><span class="ln" aria-hidden="true"><i>Happy flocks,</i></span><span class="ln" aria-hidden="true"><i>safe medicine,</i></span><span class="ln" aria-hidden="true"><i>pouch to egg.</i></span></h1>
+ <p class="lead">Safe Flock Solutions tracks your vaccines and medicine pouches, works out doses and checks every batch, so healthy birds are the default. Poultry e-commerce for your farm.</p>
+  <div class="cta"><a class="btn" href="logistics_dashboard_spa.php">Start your flock</a><a class="btn t" href="#features">See features</a><a class="btn" style="background:var(--green);" href="https://drive.google.com/uc?export=download&id=1Uf6G8GSi2L_fTjmSWlAd4ftJEWrjhEMt"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>Download Android APK</a></div>
+  <p style="margin-top:16px;font:900 16px 'Comic Neue';color:var(--coral);opacity:0;transform:translateY(20px);animation:fi .8s .95s var(--e) forwards;">Get the app on your mobile device for easier access!</p></div>
+ <div class="cl" id="cl">
+  <div class="tile t1" aria-hidden="true"><svg viewBox="0 0 200 260"><use href="#egg"/></svg></div>
+  <div class="tile t2" aria-hidden="true"><svg viewBox="0 0 60 100" style="--d:.4s"><use href="#vI"/></svg></div>
+  <div class="tile t3" aria-hidden="true"><svg viewBox="0 0 100 120" style="--d:.8s"><use href="#pI"/></svg></div>
+  <div class="tile t4" id="hen" role="button" tabindex="0" aria-label="Poke the hen"><svg viewBox="0 0 140 130" style="--d:1.2s"><use href="#hI"/></svg></div>
+  <div class="chip" aria-hidden="true">Batch verified!</div>
+ </div>
+</section></div>
+
+<div class="band" aria-hidden="true"><div><span>Vaccines</span><span>★</span><span>Medicine pouches</span><span>★</span><span>Dose calculator</span><span>★</span><span>QR batch checks</span><span>★</span><span>Egg tracking</span><span>★</span><span>Poultry e-commerce</span><span>★</span><span>Vaccines</span><span>★</span><span>Medicine pouches</span><span>★</span><span>Dose calculator</span><span>★</span><span>QR batch checks</span><span>★</span><span>Egg tracking</span><span>★</span><span>Poultry e-commerce</span><span>★</span></div></div>
+
+<section class="pin" id="features"><div class="sticky wrap">
+ <div><h2 class="fh">Four tools, one happy coop.</h2>
+ <ul class="fl" id="fl">
+  <li class="on"><h3>Live inventory</h3><p>Vials, pouches and egg trays in one list. Low stock is flagged early.</p></li>
+  <li><h3>Dosage calculator</h3><p>Slide to your flock size and see the doses to prepare, plus 5% spare.</p></li>
+  <li><h3>Passcode access</h3><p>Everyone signs in with their own code and sees only their role's data.</p></li>
+  <li><h3>QR verification</h3><p>Scan a pouch or vial to check batch, expiry and safety status.</p></li>
+ </ul></div>
+ <div class="stage"><span class="tape"></span>
+  <div class="pn on"><span class="k" style="--i:0">Stock today</span>
+   <div class="ir" style="--i:1"><svg viewBox="0 0 60 100"><use href="#vI"/></svg><div>Newcastle vaccine<div class="bar"><u data-w="82"></u></div></div><em data-c="164">0</em></div>
+   <div class="ir" style="--i:2"><svg viewBox="0 0 100 120"><use href="#pI"/></svg><div>Vitamin pouches<div class="bar"><u data-w="55"></u></div></div><em data-c="88">0</em></div>
+   <div class="ir" style="--i:3"><svg viewBox="0 0 100 120"><use href="#pI"/></svg><div>Antibiotic pouches: reorder!<div class="bar"><u class="lo" data-w="12"></u></div></div><em data-c="9">0</em></div>
+   <div class="ir" style="--i:4"><svg viewBox="0 0 200 260"><use href="#egg"/></svg><div>Egg trays<div class="bar"><u data-w="68"></u></div></div><em data-c="340">0</em></div></div>
+  <div class="pn"><span class="k" style="--i:0">Doses to prepare</span><div class="big" id="dz" style="--i:1">525</div>
+   <div style="--i:2"><label class="k" for="bd">Flock size: <span id="bv">500</span> birds</label><input id="bd" type="range" min="50" max="5000" step="50" value="500"></div>
+   <span style="--i:3;font-size:15px">Sample math: one dose per bird plus 5%. Follow each product's label.</span></div>
+  <div class="pn"><span class="k" style="--i:0">Team passcode</span><div class="dots" style="--i:1"><i></i><i></i><i></i><i></i></div>
+   <div class="keys" style="--i:2"><b>1</b><b>2</b><b>3</b><b>4</b><b>5</b><b>6</b><b>7</b><b>8</b><b>9</b><b>0</b></div><div class="ok" id="ok" style="--i:3">Enter passcode</div></div>
+  <div class="pn" style="align-items:center;text-align:center"><div class="qs" style="--i:0"><svg viewBox="0 0 100 120"><use href="#pI"/><g id="qg" fill="#2b2b2b"></g></svg><div class="bm"></div></div><div class="ok" id="qo" style="--i:1">Scanning batch…</div></div>
+ </div></div></section>
+
+<div class="wrap steps" id="how"><h2 class="rv">Pouch to flock in four steps.</h2>
+ <div class="row">
+  <div class="st"><svg viewBox="0 0 100 120"><use href="#pI"/></svg><h3>Receive</h3><p>Log new stock when it arrives.</p></div>
+  <div class="st"><svg viewBox="0 0 60 100"><use href="#vI"/></svg><h3>Verify</h3><p>Scan the QR code for batch and expiry.</p></div>
+  <div class="st"><svg viewBox="0 0 140 130"><use href="#hI"/></svg><h3>Treat</h3><p>Prepare the exact dose for your flock.</p></div>
+  <div class="st"><svg viewBox="0 0 200 260"><use href="#egg"/></svg><h3>Track</h3><p>Watch health and egg counts over time.</p></div>
+ </div></div>
+
+<div class="wrap"><section class="fin rv" id="start"><span class="o"></span><span class="o" style="animation-delay:-2s"></span><span class="o" style="animation-delay:-4s"></span>
+ <h2>Ready to keep your flock safe?</h2><p>Set up Safe Flock Solutions for your farm. Poultry e-commerce made simple.</p><a class="btn" id="mag" href="logistics_dashboard_spa.php">Get started</a></section>
+ <footer><img src="logo-safe-flock-solutions.png" alt="Safe Flock Solutions" style="height:40px;width:110px;object-fit:contain;vertical-align:middle;margin-right:8px">Safe Flock Solutions · Poultry E-commerce<span style="float:right">© 2026 Safe Flock Solutions</span></footer></div>
+</main>
+
+<script>
+(function(){
+var $=function(s,r){return(r||document).querySelector(s)},$$=function(s,r){return[].slice.call((r||document).querySelectorAll(s))};
+var rm=matchMedia('(prefers-reduced-motion:reduce)').matches;
+/* cursor */
+var cd=$('#cd'),cr=$('#cr'),mx=0,my=0,rx=0,ry=0;
+addEventListener('pointermove',function(e){mx=e.clientX;my=e.clientY;cd.style.left=mx+'px';cd.style.top=my+'px';cr.classList.toggle('h',!!e.target.closest('a,button,input,[role=button]'))});
+(function f(){rx+=(mx-rx)*.2;ry+=(my-ry)*.2;cr.style.left=rx+'px';cr.style.top=ry+'px';requestAnimationFrame(f)})();
+/* boil */
+var tb=$('#tb'),sd=1;if(!rm)setInterval(function(){sd=sd%6+1;tb.setAttribute('seed',sd)},170);
+/* QR */
+var g='';for(var r=0;r<6;r++)for(var c=0;c<6;c++){var k=(r<2&&c<2)||(r<2&&c>3)||(r>3&&c<2);if(k||(r*6+c)*29%5<2)g+='<rect x="'+(31+c*6.4)+'" y="'+(46+r*6.4)+'" width="5.6" height="5.6" rx="1"/>'}$('#qg').innerHTML=g;
+/* hero parallax + hen */
+var cl=$('#cl');if(!rm)addEventListener('pointermove',function(e){cl.style.setProperty('--mx',e.clientX/innerWidth-.5);cl.style.setProperty('--my',e.clientY/innerHeight-.5)});
+var hen=$('#hen'),w=['Cluck!','Bok bok!','Safe!','Cluck cluck!'];function cluck(){var b=document.createElement('div');b.className='bub';b.textContent=w[Math.floor(Math.random()*w.length)];b.style.left='10%';b.style.top='-10px';hen.appendChild(b);setTimeout(function(){b.remove()},1100)}
+hen.addEventListener('click',cluck);hen.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();cluck()}});
+/* calc */
+var bd=$('#bd'),dz=$('#dz'),bv=$('#bv');function cc(){bv.textContent=(+bd.value).toLocaleString();dz.textContent=Math.ceil(bd.value*1.05).toLocaleString()}bd.addEventListener('input',cc);
+function sweep(){var t0=performance.now(),a=+bd.value,z=1800;(function f(x){var p=Math.min((x-t0)/1600,1);bd.value=Math.round((a+(z-a)*(1-Math.pow(1-p,3)))/50)*50;cc();if(p<1)requestAnimationFrame(f)})(t0)}
+/* demos */
+var tm=[];function clr(){tm.forEach(clearTimeout);tm=[]}function T(f,ms){tm.push(setTimeout(f,ms))}
+function count(el){var n=+el.dataset.c,t0=performance.now();(function f(x){var p=Math.min((x-t0)/1500,1);el.textContent=Math.round(n*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(f)})(t0)}
+var pns=$$('.pn');
+function run(n){clr();var p=pns[n];
+ if(n===0){$$('.bar u',p).forEach(function(u){u.style.width=u.dataset.w+'%'});$$('[data-c]',p).forEach(count)}
+ if(n===1){bd.value=500;cc();T(sweep,700)}
+ if(n===2){var d=$$('.dots i',p),kk=$$('.keys b',p),o=$('#ok'),q=[3,7,1,9],i=0;d.forEach(function(x){x.classList.remove('on')});o.textContent='Enter passcode';o.className='ok';
+  (function s(){if(i<4){var e=kk[q[i]];e.classList.add('h');d[i].classList.add('on');T(function(){e.classList.remove('h')},170);i++;T(s,430)}else{o.textContent='Access granted!';o.className='ok y';T(function(){run(2)},3000)}})()}
+ if(n===3){var o=$('#qo');(function l(){o.textContent='Scanning batch…';o.className='ok';T(function(){o.textContent='Batch verified, safe to use!';o.className='ok y';T(l,2800)},2300)})()}}
+/* pinned scroll */
+var sec=$('#features'),lis=$$('#fl li'),fl=$('#fl'),cur=-1,pgb=$('#pg');
+function upd(){var r=sec.getBoundingClientRect(),m=r.height-innerHeight,p=Math.max(0,Math.min(1,-r.top/m)),i=Math.min(3,Math.floor(p*4));
+ if(r.top<innerHeight&&r.bottom>0&&i!==cur){cur=i;pns.forEach(function(x,j){x.classList.toggle('on',j<=i)});lis.forEach(function(x,j){x.classList.toggle('on',j===i)});fl.style.setProperty('--p',(i+1)/4);run(i)}
+ var h=document.documentElement.scrollHeight-innerHeight;pgb.style.transform='scaleX('+(h>0?scrollY/h:0)+')'}
+addEventListener('scroll',upd,{passive:true});addEventListener('resize',upd);upd();
+/* reveals */
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.2});
+$$('.rv').forEach(function(x){io.observe(x)});$$('.st').forEach(function(x,i){x.style.transitionDelay=i*.12+'s';io.observe(x)});
+})();
+</script>
+</body>
+</html>
