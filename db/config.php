@@ -92,7 +92,17 @@ if (getenv('SFS_DEBUG_LOG') || file_exists(__DIR__ . '/../debug_on')) {
 }
 
 $baseUrlFromEnv = getenv('SFS_BASE_URL');
-if ($baseUrlFromEnv !== false && $baseUrlFromEnv !== '') {
+$isLocalHost = isset($_SERVER['HTTP_HOST']) && in_array($_SERVER['HTTP_HOST'], ['localhost', '127.0.0.1', 'localhost:8080', '127.0.0.1:8080'], true);
+if ($isLocalHost && isset($_SERVER['HTTP_HOST']) && $_SERVER['HTTP_HOST'] !== '') {
+  $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+  $scriptDir = dirname($_SERVER['SCRIPT_NAME'] ?? '/');
+  $scriptDir = str_replace('\\', '/', $scriptDir);
+  if (preg_match('#/(auth|api)(/|$)#', $scriptDir)) {
+    $scriptDir = dirname($scriptDir);
+  }
+  $baseDir = rtrim($scriptDir, '/');
+  define('SFS_BASE_URL', $scheme . '://' . $_SERVER['HTTP_HOST'] . ($baseDir !== '' ? $baseDir : ''));
+} elseif ($baseUrlFromEnv !== false && $baseUrlFromEnv !== '') {
   define('SFS_BASE_URL', rtrim((string)$baseUrlFromEnv, '/'));
 } elseif (isset($_SERVER['HTTP_HOST']) && $_SERVER['HTTP_HOST'] !== '') {
   $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
@@ -104,7 +114,7 @@ if ($baseUrlFromEnv !== false && $baseUrlFromEnv !== '') {
   $baseDir = rtrim($scriptDir, '/');
   define('SFS_BASE_URL', $scheme . '://' . $_SERVER['HTTP_HOST'] . ($baseDir !== '' ? $baseDir : ''));
 } else {
-  define('SFS_BASE_URL', 'https://SAFEFLOCKSOLUTIONS.freedev.app');
+  define('SFS_BASE_URL', 'http://localhost:8080/sfs/poultry-ecommerce');
 }
 
 // Textbee OTP SMS configuration (resolved earlier: env -> shared config -> fallback)
